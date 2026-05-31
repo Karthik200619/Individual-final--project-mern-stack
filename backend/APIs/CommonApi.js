@@ -14,8 +14,8 @@ CommonApi.post('/login', async (req, res) => {
     let { user, token } = await authenticatelogin({ loginObj });
     res.cookie('token', token, {
         httpOnly: true,
-        sameSite: 'lax',
-        secure: false
+        sameSite: 'none',
+        secure: true
     })
     res.status(200).json({ message: 'login successfull', payload: user })
 })
@@ -23,8 +23,8 @@ CommonApi.post('/login', async (req, res) => {
 CommonApi.get('/logout', async (req, res) => {
     res.clearCookie('token', {
         httpOnly: true,
-        sameSite: 'lax',
-        secure: false
+        sameSite: 'none',
+        secure: true
     })
     res.status(200).json({ message: 'logout successfull' })
 })
