@@ -2,6 +2,18 @@
 
 CampusKart is a full-stack MERN marketplace built exclusively for college students. The platform enables students to buy, sell, exchange, and manage products securely within their campus ecosystem using verified institutional email authentication.
 
+## FOR TESTING OF ADMIN USE this mail and PASSWORD
+* email:admin@anurag.edu.in
+*Password:Admin@1234
+
+## FOR TESTING USER USE 
+* email:23eg112e52@anurag.edu.in
+* password:Test@1234
+
+# IF U WANT TO TEST PRODUCTS LOGIN AS ADMIN AND APPROVE YOUR PRODUCTS
+
+
+
 ## Features
 
 ### Authentication & Security
@@ -164,6 +176,8 @@ SMTP: Brevo
 * Campus moderation dashboard
 * Product recommendation engine
 * AI-assisted search
+
+
 
 ## Author
 
