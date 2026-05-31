@@ -1,12 +1,15 @@
 import nodemailer from 'nodemailer'
+import { config } from 'dotenv'
+
+config()
 
 const transporter = nodemailer.createTransport({
-    secure: true,
-    host: 'smtp.gmail.com',
+    host: 'smtp-relay.brevo.com',
     port: 587,
+    secure: false,
     auth: {
-        user: '23eg112e53@anurag.edu.in',
-        pass: 'ayxaffegmroulzwo'
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
     }
 })
 
@@ -24,6 +27,7 @@ async function sendemail(to, sub, msg) {
     } catch (err) {
 
         console.error('MAIL ERROR:', err)
+        throw err
 
     }
 }
