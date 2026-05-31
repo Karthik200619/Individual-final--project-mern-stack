@@ -28,7 +28,7 @@ function Header() {
 
         const fetchNotifications = async () => {
             try {
-                const res = await axios.get('http://localhost:5000/user-api/notifications', { withCredentials: true })
+                const res = await axios.get('https://individual-final-project-mern-stack.onrender.com/user-api/notifications', { withCredentials: true })
                 setNotifications(res.data.payload || [])
             } catch (err) {
                 console.error('Error fetching notifications for header:', err)
@@ -41,7 +41,7 @@ function Header() {
 
     const markNotificationRead = async (id) => {
         try {
-            await axios.patch(`http://localhost:5000/user-api/notifications/${id}/read`, {}, { withCredentials: true })
+            await axios.patch(`https://individual-final-project-mern-stack.onrender.com/user-api/notifications/${id}/read`, {}, { withCredentials: true })
             setNotifications(prev => prev.map(note => note._id === id ? { ...note, read: true } : note))
         } catch (err) {
             console.error('Failed to mark notification as read:', err)
@@ -52,7 +52,7 @@ function Header() {
         if (isAuthenticated) {
             const fetchCoupons = async () => {
                 try {
-                    const res = await axios.get('http://localhost:5000/user-api/active-coupons', { withCredentials: true })
+                    const res = await axios.get('https://individual-final-project-mern-stack.onrender.com/user-api/active-coupons', { withCredentials: true })
                     setActiveCoupons(res.data.payload || [])
                 } catch (err) {
                     console.error("Error fetching active coupons for header:", err)

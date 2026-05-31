@@ -14,7 +14,7 @@ function HelpCenter() {
 
     const fetchQueries = async () => {
         try {
-            const res = await axios.get('http://localhost:5000/user-api/help-queries', { withCredentials: true })
+            const res = await axios.get('https://individual-final-project-mern-stack.onrender.com/user-api/help-queries', { withCredentials: true })
             setQueries(res.data.payload || [])
         } catch (err) {
             console.log(err)
@@ -48,7 +48,7 @@ function HelpCenter() {
             setFormError('')
             setFormSuccess('')
             
-            await axios.post('http://localhost:5000/user-api/help-queries', {
+            await axios.post('https://individual-final-project-mern-stack.onrender.com/user-api/help-queries', {
                 subject: subject.trim(),
                 message: message.trim()
             }, { withCredentials: true })

@@ -17,7 +17,7 @@ function Orders() {
         const getOrders = async () => {
             try {
                 const res = await axios.get(
-                    'http://localhost:5000/user-api/myorders',
+                    'https://individual-final-project-mern-stack.onrender.com/user-api/myorders',
                     {
                         withCredentials: true
                     }
@@ -46,7 +46,7 @@ function Orders() {
         try {
             setSubmittingQuery(true)
             await axios.post(
-                `http://localhost:5000/user-api/help-queries/order/${selectedOrderForQuery._id}`,
+                `https://individual-final-project-mern-stack.onrender.com/user-api/help-queries/order/${selectedOrderForQuery._id}`,
                 {
                     subject: querySubject.trim(),
                     message: queryMessage.trim()

@@ -10,7 +10,7 @@ function SellerOrders() {
     const getSellerOrders = async () => {
         try {
             const res = await axios.get(
-                'http://localhost:5000/user-api/sellerorders',
+                'https://individual-final-project-mern-stack.onrender.com/user-api/sellerorders',
                 {
                     withCredentials: true
                 }
@@ -28,7 +28,7 @@ function SellerOrders() {
     const getSellerQueries = async () => {
         try {
             setLoadingQueries(true)
-            const res = await axios.get('http://localhost:5000/user-api/seller/help-queries', { withCredentials: true })
+            const res = await axios.get('https://individual-final-project-mern-stack.onrender.com/user-api/seller/help-queries', { withCredentials: true })
             setQueries(res.data.payload || [])
         } catch (err) {
             console.log(err)
@@ -46,7 +46,7 @@ function SellerOrders() {
     const acceptOrder = async (orderId) => {
         try {
             await axios.patch(
-                `http://localhost:5000/user-api/acceptorder/${orderId}`,
+                `https://individual-final-project-mern-stack.onrender.com/user-api/acceptorder/${orderId}`,
                 {},
                 {
                     withCredentials: true
@@ -71,7 +71,7 @@ function SellerOrders() {
         if (!window.confirm('Are you sure you want to reject this order?')) return
         try {
             await axios.patch(
-                `http://localhost:5000/user-api/rejectorder/${orderId}`,
+                `https://individual-final-project-mern-stack.onrender.com/user-api/rejectorder/${orderId}`,
                 {},
                 {
                     withCredentials: true
@@ -95,7 +95,7 @@ function SellerOrders() {
     const handleUpdateDeliveryStatus = async (deliveryId, status, orderId) => {
         try {
             const res = await axios.patch(
-                `http://localhost:5000/user-api/delivery/${deliveryId}/status`,
+                `https://individual-final-project-mern-stack.onrender.com/user-api/delivery/${deliveryId}/status`,
                 { status },
                 { withCredentials: true }
             )

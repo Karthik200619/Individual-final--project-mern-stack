@@ -40,7 +40,7 @@ function BuyItem() {
         const getItem = async () => {
             try {
                 const res = await axios.get(
-                    `http://localhost:5000/user-api/item/${itemId}`,
+                    `https://individual-final-project-mern-stack.onrender.com/user-api/item/${itemId}`,
                     {
                         withCredentials: true
                     }
@@ -70,7 +70,7 @@ function BuyItem() {
         if (!couponCode.trim()) return
         try {
             setApplyingCoupon(true)
-            const res = await axios.post('http://localhost:5000/user-api/discount/apply', {
+            const res = await axios.post('https://individual-final-project-mern-stack.onrender.com/user-api/discount/apply', {
                 code: couponCode,
                 itemId: item._id,
                 subtotal: item.price * quantity
@@ -94,7 +94,7 @@ function BuyItem() {
         try {
             setLoading(true)
             await axios.post(
-                `http://localhost:5000/user-api/buyitem/${itemId}`,
+                `https://individual-final-project-mern-stack.onrender.com/user-api/buyitem/${itemId}`,
                 {
                     quantity,
                     deliveryType,
@@ -110,7 +110,7 @@ function BuyItem() {
 
             // Remove from cart if it was in cart
             try {
-                await axios.delete(`http://localhost:5000/user-api/cart/remove/${itemId}`, {
+                await axios.delete(`https://individual-final-project-mern-stack.onrender.com/user-api/cart/remove/${itemId}`, {
                     withCredentials: true
                 })
             } catch (cartErr) {

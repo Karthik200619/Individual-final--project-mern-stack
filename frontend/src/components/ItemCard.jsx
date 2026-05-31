@@ -33,7 +33,7 @@ function ItemCard() {
     const getItem = async () => {
         try {
             const res = await axios.get(
-                `http://localhost:5000/user-api/item/${itemId}`,
+                `https://individual-final-project-mern-stack.onrender.com/user-api/item/${itemId}`,
                 {
                     withCredentials: true
                 }
@@ -52,7 +52,7 @@ function ItemCard() {
 
     const handleAddToCart = async () => {
         try {
-            await axios.post('http://localhost:5000/user-api/cart/add', {
+            await axios.post('https://individual-final-project-mern-stack.onrender.com/user-api/cart/add', {
                 itemId: item._id,
                 quantity: 1
             }, {
@@ -70,7 +70,7 @@ function ItemCard() {
         e.preventDefault()
         if (!newComment.trim()) return
         try {
-            const res = await axios.post(`http://localhost:5000/user-api/item/${itemId}/comment`, {
+            const res = await axios.post(`https://individual-final-project-mern-stack.onrender.com/user-api/item/${itemId}/comment`, {
                 commentBody: newComment
             }, {
                 withCredentials: true
@@ -86,7 +86,7 @@ function ItemCard() {
     const handleDeleteComment = async (commentId) => {
         if (!window.confirm('Delete this comment?')) return
         try {
-            const res = await axios.delete(`http://localhost:5000/user-api/item/${itemId}/comment/${commentId}`, {
+            const res = await axios.delete(`https://individual-final-project-mern-stack.onrender.com/user-api/item/${itemId}/comment/${commentId}`, {
                 withCredentials: true
             })
             setComments(res.data.payload)
@@ -99,7 +99,7 @@ function ItemCard() {
     const handleEditCommentSubmit = async (commentId) => {
         if (!editedCommentBody.trim()) return
         try {
-            const res = await axios.put(`http://localhost:5000/user-api/item/${itemId}/comment/${commentId}`, {
+            const res = await axios.put(`https://individual-final-project-mern-stack.onrender.com/user-api/item/${itemId}/comment/${commentId}`, {
                 commentBody: editedCommentBody
             }, {
                 withCredentials: true

@@ -39,7 +39,7 @@ function AddItem() {
       }
       // axios call to backend
       const res = await axios.post(
-        "http://localhost:5000/user-api/additem",
+        "https://individual-final-project-mern-stack.onrender.com/user-api/additem",
         formData,
         {
           withCredentials: true

@@ -17,7 +17,7 @@ function ForgotPassword() {
         try {
 
             const res = await axios.post(
-                'http://localhost:5000/common-api/forgetpass',
+                'https://individual-final-project-mern-stack.onrender.com/common-api/forgetpass',
                 data
             )
 
@@ -27,7 +27,7 @@ function ForgotPassword() {
             }
 
             await axios.post(
-                'http://localhost:5000/common-api/sendotp',
+                'https://individual-final-project-mern-stack.onrender.com/common-api/sendotp',
                 {
                     email: data.email
                 }

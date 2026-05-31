@@ -72,7 +72,7 @@ function AdminDashBoard() {
 
     const fetchUsers = async (page = 1, search = '', sortBy = '') => {
         try {
-            const res = await axios.get(`http://localhost:5000/admin-api/users?page=${page}&limit=10&search=${search}&sortBy=${sortBy}`, { withCredentials: true })
+            const res = await axios.get(`https://individual-final-project-mern-stack.onrender.com/admin-api/users?page=${page}&limit=10&search=${search}&sortBy=${sortBy}`, { withCredentials: true })
             setUsersPagination(res.data.payload || { users: [], totalPages: 1, currentPage: 1, totalUsers: 0 })
         } catch (err) {
             console.log(err)
@@ -81,7 +81,7 @@ function AdminDashBoard() {
 
     const fetchQueries = async () => {
         try {
-            const res = await axios.get('http://localhost:5000/admin-api/queries', { withCredentials: true })
+            const res = await axios.get('https://individual-final-project-mern-stack.onrender.com/admin-api/queries', { withCredentials: true })
             setQueries(res.data.payload || [])
         } catch (err) {
             console.log(err)
@@ -92,26 +92,26 @@ function AdminDashBoard() {
         try {
             setLoading(true)
             // Stats
-            const statsRes = await axios.get('http://localhost:5000/admin-api/stats', { withCredentials: true })
+            const statsRes = await axios.get('https://individual-final-project-mern-stack.onrender.com/admin-api/stats', { withCredentials: true })
             setStats(statsRes.data.payload)
 
             // Pending
-            const pendingRes = await axios.get('http://localhost:5000/admin-api/pending-items', { withCredentials: true })
+            const pendingRes = await axios.get('https://individual-final-project-mern-stack.onrender.com/admin-api/pending-items', { withCredentials: true })
             setPendingItems(pendingRes.data.payload)
 
             // Approved
-            const approvedRes = await axios.get('http://localhost:5000/admin-api/approved-items', { withCredentials: true })
+            const approvedRes = await axios.get('https://individual-final-project-mern-stack.onrender.com/admin-api/approved-items', { withCredentials: true })
             setApprovedItems(approvedRes.data.payload)
 
             // Coupons
-            const couponRes = await axios.get('http://localhost:5000/admin-api/discounts', { withCredentials: true })
+            const couponRes = await axios.get('https://individual-final-project-mern-stack.onrender.com/admin-api/discounts', { withCredentials: true })
             setCoupons(couponRes.data.payload)
 
             // Users
             await fetchUsers(userPage, userSearch, userSortBy)
 
             // Campuses
-            const campusRes = await axios.get('http://localhost:5000/admin-api/campuses', { withCredentials: true })
+            const campusRes = await axios.get('https://individual-final-project-mern-stack.onrender.com/admin-api/campuses', { withCredentials: true })
             setCampuses(campusRes.data.payload)
 
             // Help Queries
@@ -142,7 +142,7 @@ function AdminDashBoard() {
 
     const fetchNotifications = async () => {
         try {
-            const res = await axios.get('http://localhost:5000/admin-api/notifications', { withCredentials: true })
+            const res = await axios.get('https://individual-final-project-mern-stack.onrender.com/admin-api/notifications', { withCredentials: true })
             setNotifications(res.data.payload || [])
         } catch (err) {
             console.log(err)
@@ -154,7 +154,7 @@ function AdminDashBoard() {
         if (!newNotification.title.trim() || !newNotification.message.trim()) return
         try {
             setSubmittingNotification(true)
-            await axios.post('http://localhost:5000/admin-api/notifications', newNotification, { withCredentials: true })
+            await axios.post('https://individual-final-project-mern-stack.onrender.com/admin-api/notifications', newNotification, { withCredentials: true })
             alert('Notification sent successfully!')
             setNewNotification({ recipientId: '', title: '', message: '', type: 'admin', all: false })
             fetchNotifications()
@@ -169,7 +169,7 @@ function AdminDashBoard() {
     // Listing operations
     const handleApproveItem = async (id) => {
         try {
-            await axios.put(`http://localhost:5000/admin-api/approve-item/${id}`, {}, { withCredentials: true })
+            await axios.put(`https://individual-final-project-mern-stack.onrender.com/admin-api/approve-item/${id}`, {}, { withCredentials: true })
             alert('Item approved successfully!')
             fetchAllData()
         } catch (err) {
@@ -181,7 +181,7 @@ function AdminDashBoard() {
     const handleRejectItem = async (id) => {
         if (!window.confirm('Are you sure you want to reject/delete this item?')) return
         try {
-            await axios.delete(`http://localhost:5000/admin-api/reject-item/${id}`, { withCredentials: true })
+            await axios.delete(`https://individual-final-project-mern-stack.onrender.com/admin-api/reject-item/${id}`, { withCredentials: true })
             alert('Item rejected/deleted successfully')
             fetchAllData()
         } catch (err) {
@@ -193,7 +193,7 @@ function AdminDashBoard() {
     const handleAdminDeleteItem = async (id) => {
         if (!window.confirm('Delete this listing permanently?')) return
         try {
-            await axios.delete(`http://localhost:5000/admin-api/items/${id}`, { withCredentials: true })
+            await axios.delete(`https://individual-final-project-mern-stack.onrender.com/admin-api/items/${id}`, { withCredentials: true })
             alert('Item deleted successfully')
             fetchAllData()
         } catch (err) {
@@ -208,7 +208,7 @@ function AdminDashBoard() {
         if (!newCoupon.code.trim()) return
         try {
             setSubmittingCoupon(true)
-            await axios.post('http://localhost:5000/admin-api/discounts', newCoupon, { withCredentials: true })
+            await axios.post('https://individual-final-project-mern-stack.onrender.com/admin-api/discounts', newCoupon, { withCredentials: true })
             alert('Coupon created successfully!')
             setNewCoupon({ code: '', discountPercentage: 10, expiresAt: '', category: 'ALL', minPrice: 0, maxPrice: '', usageLimit: '' })
             fetchAllData()
@@ -222,7 +222,7 @@ function AdminDashBoard() {
 
     const handleToggleCoupon = async (id) => {
         try {
-            await axios.patch(`http://localhost:5000/admin-api/discounts/${id}/toggle`, {}, { withCredentials: true })
+            await axios.patch(`https://individual-final-project-mern-stack.onrender.com/admin-api/discounts/${id}/toggle`, {}, { withCredentials: true })
             fetchAllData()
         } catch (err) {
             console.log(err)
@@ -232,7 +232,7 @@ function AdminDashBoard() {
     const handleApproveAllPending = async () => {
         if (!window.confirm(`Approve all ${pendingItems.length} pending items at once?`)) return
         try {
-            await axios.put('http://localhost:5000/admin-api/approve-all-items', {}, { withCredentials: true })
+            await axios.put('https://individual-final-project-mern-stack.onrender.com/admin-api/approve-all-items', {}, { withCredentials: true })
             alert(`All ${pendingItems.length} pending items approved successfully!`)
             fetchAllData()
         } catch (err) {
@@ -244,7 +244,7 @@ function AdminDashBoard() {
     const handleDeleteCoupon = async (id) => {
         if (!window.confirm('Delete this coupon code?')) return
         try {
-            await axios.delete(`http://localhost:5000/admin-api/discounts/${id}`, { withCredentials: true })
+            await axios.delete(`https://individual-final-project-mern-stack.onrender.com/admin-api/discounts/${id}`, { withCredentials: true })
             alert('Coupon deleted')
             fetchAllData()
         } catch (err) {
@@ -256,7 +256,7 @@ function AdminDashBoard() {
     // User operations
     const handleToggleUser = async (id) => {
         try {
-            await axios.patch(`http://localhost:5000/admin-api/users/${id}/toggle-active`, {}, { withCredentials: true })
+            await axios.patch(`https://individual-final-project-mern-stack.onrender.com/admin-api/users/${id}/toggle-active`, {}, { withCredentials: true })
             fetchAllData()
         } catch (err) {
             console.log(err)
@@ -267,7 +267,7 @@ function AdminDashBoard() {
     const handleDeleteUser = async (id) => {
         if (!window.confirm('Permanently delete this user account?')) return
         try {
-            await axios.delete(`http://localhost:5000/admin-api/users/${id}`, { withCredentials: true })
+            await axios.delete(`https://individual-final-project-mern-stack.onrender.com/admin-api/users/${id}`, { withCredentials: true })
             alert('User deleted successfully')
             fetchAllData()
         } catch (err) {
@@ -282,7 +282,7 @@ function AdminDashBoard() {
         if (!newCampus.campusName.trim() || !newCampus.campusEmailDomain.trim()) return
         try {
             setSubmittingCampus(true)
-            await axios.post('http://localhost:5000/admin-api/campuses', newCampus, { withCredentials: true })
+            await axios.post('https://individual-final-project-mern-stack.onrender.com/admin-api/campuses', newCampus, { withCredentials: true })
             alert('Campus registered successfully!')
             setNewCampus({ campusName: '', campusLogo: '', campusEmailDomain: '', description: '', city: '' })
             fetchAllData()
@@ -296,7 +296,7 @@ function AdminDashBoard() {
 
     const handleToggleCampusApprove = async (id) => {
         try {
-            await axios.patch(`http://localhost:5000/admin-api/campuses/${id}/approve`, {}, { withCredentials: true })
+            await axios.patch(`https://individual-final-project-mern-stack.onrender.com/admin-api/campuses/${id}/approve`, {}, { withCredentials: true })
             fetchAllData()
         } catch (err) {
             console.log(err)
@@ -307,7 +307,7 @@ function AdminDashBoard() {
     const handleDeleteCampus = async (id) => {
         if (!window.confirm('Delete this campus?')) return
         try {
-            await axios.delete(`http://localhost:5000/admin-api/campuses/${id}`, { withCredentials: true })
+            await axios.delete(`https://individual-final-project-mern-stack.onrender.com/admin-api/campuses/${id}`, { withCredentials: true })
             alert('Campus deleted')
             fetchAllData()
         } catch (err) {
@@ -318,7 +318,7 @@ function AdminDashBoard() {
 
     const handleSendReply = async (queryId, reply) => {
         try {
-            await axios.post(`http://localhost:5000/admin-api/queries/${queryId}/reply`, { reply }, { withCredentials: true })
+            await axios.post(`https://individual-final-project-mern-stack.onrender.com/admin-api/queries/${queryId}/reply`, { reply }, { withCredentials: true })
             alert('Reply sent successfully!')
             fetchQueries()
         } catch (err) {
@@ -329,7 +329,7 @@ function AdminDashBoard() {
 
     const handleMarkViewed = async (queryId) => {
         try {
-            await axios.patch(`http://localhost:5000/admin-api/queries/${queryId}/view`, {}, { withCredentials: true })
+            await axios.patch(`https://individual-final-project-mern-stack.onrender.com/admin-api/queries/${queryId}/view`, {}, { withCredentials: true })
             fetchQueries()
         } catch (err) {
             console.log(err)

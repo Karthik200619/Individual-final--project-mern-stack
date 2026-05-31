@@ -18,7 +18,7 @@ function ResetPassword() {
         try {
 
             await axios.post(
-                'http://localhost:5000/common-api/resetpassword',
+                'https://individual-final-project-mern-stack.onrender.com/common-api/resetpassword',
                 {
                     email,
                     password: data.password

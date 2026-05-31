@@ -43,7 +43,7 @@ function AllProducts() {
     useEffect(() => {
         const fetchCampuses = async () => {
             try {
-                const res = await axios.get('http://localhost:5000/user-api/campuses', { withCredentials: true })
+                const res = await axios.get('https://individual-final-project-mern-stack.onrender.com/user-api/campuses', { withCredentials: true })
                 setCampuses(res.data.payload || [])
             } catch (err) {
                 console.error(err)
@@ -62,7 +62,7 @@ function AllProducts() {
         const fetchItems = async () => {
             setLoading(true)
             try {
-                const res = await axios.get('http://localhost:5000/user-api/items', {
+                const res = await axios.get('https://individual-final-project-mern-stack.onrender.com/user-api/items', {
                     params: {
                         search,
                         category: selectedCategory,

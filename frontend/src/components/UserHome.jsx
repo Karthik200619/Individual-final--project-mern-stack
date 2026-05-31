@@ -78,7 +78,7 @@ function UserHome() {
         const getItems = async () => {
             try {
                 setLoading(true)
-                const res = await axios.get('http://localhost:5000/user-api/items', {
+                const res = await axios.get('https://individual-final-project-mern-stack.onrender.com/user-api/items', {
                     params: { limit: LIMIT },
                     withCredentials: true
                 })
@@ -100,7 +100,7 @@ function UserHome() {
         if (!hasMore || loadingMore) return
         try {
             setLoadingMore(true)
-            const res = await axios.get('http://localhost:5000/user-api/items', {
+            const res = await axios.get('https://individual-final-project-mern-stack.onrender.com/user-api/items', {
                 params: { limit: LIMIT, after: lastId },
                 withCredentials: true
             })
@@ -122,7 +122,7 @@ function UserHome() {
         if (value.trim() === '') {
             try {
                 setLoading(true)
-                const res = await axios.get('http://localhost:5000/user-api/items', {
+                const res = await axios.get('https://individual-final-project-mern-stack.onrender.com/user-api/items', {
                     params: { limit: LIMIT },
                     withCredentials: true
                 })
@@ -141,7 +141,7 @@ function UserHome() {
         try {
             setLoading(true)
             const res = await axios.post(
-                'http://localhost:5000/user-api/aisearch',
+                'https://individual-final-project-mern-stack.onrender.com/user-api/aisearch',
                 { query: value },
                 { withCredentials: true }
             )

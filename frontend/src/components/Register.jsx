@@ -36,7 +36,7 @@ function Register() {
       try {
 
         const res = await axios.get(
-          'http://localhost:5000/user-api/campuses'
+          'https://individual-final-project-mern-stack.onrender.com/user-api/campuses'
         )
 
         setCampuses(res.data.payload)

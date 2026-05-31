@@ -27,7 +27,7 @@ function UpdateItem() {
         const getItem = async () => {
             try {
                 setLoading(true)
-                const res = await axios.get(`http://localhost:5000/user-api/item/${itemId}`, {
+                const res = await axios.get(`https://individual-final-project-mern-stack.onrender.com/user-api/item/${itemId}`, {
                     withCredentials: true
                 })
                 const item = res.data.payload
@@ -54,7 +54,7 @@ function UpdateItem() {
     const uploadFile = async (file) => {
         const formData = new FormData()
         formData.append('file', file)
-        const res = await axios.post('http://localhost:5000/user-api/test-video-upload', formData, {
+        const res = await axios.post('https://individual-final-project-mern-stack.onrender.com/user-api/test-video-upload', formData, {
             headers: { 'Content-Type': 'multipart/form-data' },
             withCredentials: true
         })
@@ -132,7 +132,7 @@ function UpdateItem() {
                 videos,
                 rating: Number(rating)
             }
-            await axios.post(`http://localhost:5000/user-api/updateitem/${itemId}`, payload, {
+            await axios.post(`https://individual-final-project-mern-stack.onrender.com/user-api/updateitem/${itemId}`, payload, {
                 withCredentials: true
             })
             alert('Item updated successfully! It is now pending admin approval.')

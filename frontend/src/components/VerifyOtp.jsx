@@ -21,8 +21,8 @@ function VerifyOtp() {
 
             const endpoint =
                 purpose === 'REGISTER'
-                    ? 'http://localhost:5000/common-api/verify-register-otp'
-                    : 'http://localhost:5000/common-api/verifyotp'
+                    ? 'https://individual-final-project-mern-stack.onrender.com/common-api/verify-register-otp'
+                    : 'https://individual-final-project-mern-stack.onrender.com/common-api/verifyotp'
 
             const res = await axios.post(
                 endpoint,

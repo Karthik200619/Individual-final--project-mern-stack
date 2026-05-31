@@ -17,7 +17,7 @@ function MyListings() {
     const getMyItems = async () => {
         try {
             setLoading(true)
-            const res = await axios.get('http://localhost:5000/user-api/my-items', {
+            const res = await axios.get('https://individual-final-project-mern-stack.onrender.com/user-api/my-items', {
                 withCredentials: true
             })
             const payload = res.data.payload || {}
@@ -37,7 +37,7 @@ function MyListings() {
     const handleDelete = async (itemId) => {
         if (!window.confirm('Are you sure you want to delete this listing?')) return
         try {
-            await axios.delete(`http://localhost:5000/user-api/deleteitem/${itemId}`, {
+            await axios.delete(`https://individual-final-project-mern-stack.onrender.com/user-api/deleteitem/${itemId}`, {
                 withCredentials: true
             })
             alert('Listing deleted successfully')

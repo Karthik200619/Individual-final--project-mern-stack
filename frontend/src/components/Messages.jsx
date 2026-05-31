@@ -25,7 +25,7 @@ function Messages() {
     // Fetch conversations list
     const getConversations = async () => {
         try {
-            const res = await axios.get('http://localhost:5000/user-api/chat/conversations', {
+            const res = await axios.get('https://individual-final-project-mern-stack.onrender.com/user-api/chat/conversations', {
                 withCredentials: true
             })
             setConversations(res.data.payload || [])
@@ -40,7 +40,7 @@ function Messages() {
     const getItemContext = async () => {
         if (!queryItemId) return
         try {
-            const res = await axios.get(`http://localhost:5000/user-api/item/${queryItemId}`, {
+            const res = await axios.get(`https://individual-final-project-mern-stack.onrender.com/user-api/item/${queryItemId}`, {
                 withCredentials: true
             })
             setItemContext(res.data.payload)
@@ -59,7 +59,7 @@ function Messages() {
         if (!userId) return
         try {
             if (!silence) setLoadingMessages(true)
-            const res = await axios.get(`http://localhost:5000/user-api/chat/messages/${userId}`, {
+            const res = await axios.get(`https://individual-final-project-mern-stack.onrender.com/user-api/chat/messages/${userId}`, {
                 withCredentials: true
             })
             setMessages(res.data.payload || [])
@@ -96,7 +96,7 @@ function Messages() {
                     } else {
                         // Fetch item details or mock user details from seller info
                         // We will check if we can query them from an item if available
-                        const res = await axios.get(`http://localhost:5000/user-api/item/${queryItemId}`, {
+                        const res = await axios.get(`https://individual-final-project-mern-stack.onrender.com/user-api/item/${queryItemId}`, {
                             withCredentials: true
                         })
                         tempUser = res.data.payload?.seller
@@ -148,7 +148,7 @@ function Messages() {
         if (!typedMessage.trim() || !selectedUser) return
         try {
             setSending(true)
-            await axios.post('http://localhost:5000/user-api/chat/send', {
+            await axios.post('https://individual-final-project-mern-stack.onrender.com/user-api/chat/send', {
                 receiverId: selectedUser._id,
                 message: typedMessage,
                 itemId: queryItemId || undefined

@@ -28,7 +28,7 @@ export const useAuth = create((set) => ({
             )
 
             const res = await axios.post(
-                "http://localhost:5000/user-api/register",
+                "https://individual-final-project-mern-stack.onrender.com/user-api/register",
                 formData,
                 {
                     withCredentials: true
@@ -55,7 +55,7 @@ export const useAuth = create((set) => ({
 
         try {
             const res = await axios.post(
-                "http://localhost:5000/common-api/login",
+                "https://individual-final-project-mern-stack.onrender.com/common-api/login",
                 data, { withCredentials: true }
             );
 
@@ -86,7 +86,7 @@ export const useAuth = create((set) => ({
             error: null
         });
         try {
-            const res = await axios.get('http://localhost:5000/common-api/logout', {
+            const res = await axios.get('https://individual-final-project-mern-stack.onrender.com/common-api/logout', {
                 withCredentials: true
             })
             set({
@@ -111,7 +111,7 @@ export const useAuth = create((set) => ({
             error: null
         });
         try {
-            const res = await axios.get('http://localhost:5000/common-api/refresh', {
+            const res = await axios.get('https://individual-final-project-mern-stack.onrender.com/common-api/refresh', {
                 withCredentials: true
             })
             console.log(res)

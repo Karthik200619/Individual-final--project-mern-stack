@@ -23,7 +23,7 @@ function TestVideoPage() {
             const res =
                 await axios.post(
 
-                    "http://localhost:5000/user-api/test-video-upload",
+                    "https://individual-final-project-mern-stack.onrender.com/user-api/test-video-upload",
 
                     formData,
 

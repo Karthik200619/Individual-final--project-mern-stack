@@ -15,7 +15,7 @@ function DeliveryTracker() {
             try{
 
                 const res = await axios.get(
-                    `http://localhost:5000/user-api/delivery/${deliveryId}`,
+                    `https://individual-final-project-mern-stack.onrender.com/user-api/delivery/${deliveryId}`,
                     {
                         withCredentials:true
                     }

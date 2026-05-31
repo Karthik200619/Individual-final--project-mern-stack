@@ -11,7 +11,7 @@ function Cart() {
     const getCart = async () => {
         try {
             setLoading(true)
-            const res = await axios.get('http://localhost:5000/user-api/cart', {
+            const res = await axios.get('https://individual-final-project-mern-stack.onrender.com/user-api/cart', {
                 withCredentials: true
             })
             setCartItems(res.data.payload || [])
@@ -32,7 +32,7 @@ function Cart() {
             return
         }
         try {
-            const res = await axios.post('http://localhost:5000/user-api/cart/update', {
+            const res = await axios.post('https://individual-final-project-mern-stack.onrender.com/user-api/cart/update', {
                 itemId,
                 quantity: newQty
             }, {
@@ -48,7 +48,7 @@ function Cart() {
 
     const handleRemove = async (itemId) => {
         try {
-            const res = await axios.delete(`http://localhost:5000/user-api/cart/remove/${itemId}`, {
+            const res = await axios.delete(`https://individual-final-project-mern-stack.onrender.com/user-api/cart/remove/${itemId}`, {
                 withCredentials: true
             })
             setCartItems(res.data.payload)
@@ -62,7 +62,7 @@ function Cart() {
     const clearCart = async () => {
         if (!window.confirm('Are you sure you want to clear your cart?')) return
         try {
-            await axios.delete('http://localhost:5000/user-api/cart/clear', {
+            await axios.delete('https://individual-final-project-mern-stack.onrender.com/user-api/cart/clear', {
                 withCredentials: true
             })
             setCartItems([])
