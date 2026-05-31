@@ -1,16 +1,87 @@
-# React + Vite
+# CampusKart Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Frontend application for CampusKart built using React.js and Tailwind CSS.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+### User Authentication
 
-## React Compiler
+* Login
+* Registration
+* OTP Verification
+* Password Reset
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Marketplace
 
-## Expanding the ESLint configuration
+* Browse products
+* Search items
+* Filter by category
+* Campus-specific listings
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### Product Management
+
+* Add products
+* Edit products
+* Delete products
+* Upload images and videos
+
+### Shopping Experience
+
+* Cart management
+* Checkout workflow
+* Order tracking
+
+### Messaging
+
+* Buyer-seller chat
+* Conversation history
+
+### Help Center
+
+* Feedback submission
+* Support queries
+
+## Technologies
+
+* React.js
+* React Router
+* React Hook Form
+* Axios
+* Tailwind CSS
+
+## Installation
+
+npm install
+
+## Run Development Server
+
+npm run dev
+
+## Environment Variables
+
+VITE_API_URL=
+
+## Build
+
+npm run build
+
+## Deployment
+
+Render / Vercel
+
+## Screens
+
+* Login
+* Register
+* OTP Verification
+* Home
+* Product Details
+* Cart
+* Orders
+* Seller Dashboard
+* Chat
+* Help Center
+
+## Author
+
+Karthik
