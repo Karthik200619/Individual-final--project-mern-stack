@@ -1,214 +1,118 @@
-import exp from 'express'
+import express from 'express';
+import { hash } from 'bcryptjs';
 import { authenticatelogin } from '../Service/authService.js';
 import { VerifyToken } from '../middlewares/VerifyToken.js';
 import { UserModel } from '../models/UserModel.js';
 import generateOTP from '../Service/createPassCrypto.js';
 import sendemail from '../config/nodemailer.js';
-import {hash} from 'bcryptjs'
 import { OtpModel } from '../models/OtpModel.js';
-export const CommonApi = exp.Router()
 
-// login
+export const CommonApi = express.Router();
+
 CommonApi.post('/login', async (req, res) => {
-    let loginObj = req.body;
-    let { user, token } = await authenticatelogin({ loginObj });
-    res.cookie('token', token, {
-        httpOnly: true,
-        sameSite: 'none',
-        secure: true
-    })
-    res.status(200).json({ message: 'login successfull', payload: user })
-})
-// logout
-CommonApi.get('/logout', async (req, res) => {
-    res.clearCookie('token', {
-        httpOnly: true,
-        sameSite: 'none',
-        secure: true
-    })
-    res.status(200).json({ message: 'logout successfull' })
-})
-
-// refresh
-CommonApi.get('/refresh', VerifyToken, async (req, res) => {
-
-    const user = await UserModel.findById(req.user.id);
-
-    res.status(200).json({
-        message: 'refresh successful',
-        payload: user
-    });
+  const { user, token } = await authenticatelogin({ loginObj: req.body });
+  res.cookie('token', token, { httpOnly: true, sameSite: 'none', secure: true });
+  return res.status(200).json({ message: 'Login successful', payload: user });
 });
 
-// forget password
-// first get email 
+CommonApi.get('/logout', (_req, res) => {
+  res.clearCookie('token', { httpOnly: true, sameSite: 'none', secure: true });
+  return res.status(200).json({ message: 'Logout successful' });
+});
+
+CommonApi.get('/refresh', VerifyToken, async (req, res) => {
+  const user = await UserModel.findById(req.user.id).select('-password');
+  if (!user) return res.status(401).json({ message: 'Session user no longer exists' });
+  return res.status(200).json({ message: 'Refresh successful', payload: user });
+});
+
 CommonApi.post('/forgetpass', async (req, res) => {
-    // check if user exists with the email or not if does exists return true or else fasle
-    const { email } = req.body
-    // check if user exists with the email or not
-    const user = await UserModel.findOne({ email })
-    if (user === null) {
-        const verifiedObj = {
-            email: null,
-            isPresent: false
-        }
-        res.status(200).json({ message: 'user withe email not exists', payload: verifiedObj })
-        return
-    }
-    // if does the user exists 
-    const verifiedObj = {
-        email: email,
-        isPresent: true
-    }
-    res.status(200).json({ message: 'user exists with the email', payload: verifiedObj })
-})
-// now if the frontend gets true it will make a axios call to the get otp by email
-// if user exists with that email we are sending and otp to verify the user
+  const email = String(req.body.email || '').trim().toLowerCase();
+  if (!email) return res.status(400).json({ message: 'Email is required' });
+
+  const user = await UserModel.findOne({ email });
+  return res.status(200).json({
+    message: user ? 'User exists with this email' : 'User not found',
+    payload: { email: user ? email : null, isPresent: Boolean(user) },
+  });
+});
+
 CommonApi.post('/sendotp', async (req, res) => {
+  const email = String(req.body.email || '').trim().toLowerCase();
+  if (!email) return res.status(400).json({ message: 'Email is required' });
 
-    const { email } = req.body
+  const user = await UserModel.findOne({ email });
+  if (!user) return res.status(404).json({ message: 'User not found' });
 
-    const user = await UserModel.findOne({ email })
+  const otp = generateOTP();
+  await OtpModel.deleteMany({ email, purpose: 'RESET_PASSWORD' });
+  await OtpModel.create({
+    email,
+    otp,
+    purpose: 'RESET_PASSWORD',
+    verified: false,
+    expiresAt: new Date(Date.now() + 5 * 60 * 1000),
+  });
 
-    if (!user) {
-        return res.status(404).json({
-            message: 'User not found'
-        })
-    }
+  const message = '<h2>Password reset OTP</h2><p>Your code expires in 5 minutes.</p>';
+  await sendemail(email, 'Password Reset OTP', message.replace('</p>', `</p><p>Code: <strong>${otp}</strong></p>`));
+  return res.status(200).json({ message: 'OTP sent successfully' });
+});
 
-    const otp = generateOTP()
+CommonApi.post('/verify-register-otp', async (req, res) => {
+  const email = String(req.body.email || '').trim().toLowerCase();
+  const otp = String(req.body.otp || '').trim();
+  const otpData = await OtpModel.findOne({ email, otp, purpose: 'REGISTER', expiresAt: { $gt: new Date() } });
 
-    await OtpModel.create({
-        email,
-        otp,
-        purpose:'RESET_PASSWORD',
-        verified: false,
-        expiresAt: new Date(Date.now() + 5 * 60 * 1000)
-    })
+  if (!otpData) return res.status(400).json({ message: 'Invalid or expired OTP' });
 
-    const message = `
-        <h2>Password Reset OTP</h2>
-        <h1>${otp}</h1>
-        <p>This OTP expires in 5 minutes</p>
-    `
-    sendemail(email,
-        'Reset Password OTP',
-        message)
+  await UserModel.updateOne({ email }, { isEmailVerified: true });
+  await OtpModel.deleteMany({ email, purpose: 'REGISTER' });
+  return res.status(200).json({ message: 'Email verified successfully' });
+});
 
-    res.status(200).json({
-        message: 'OTP sent successfully'
-    })
-
-})
-
-CommonApi.post('/verify-register-otp',async(req,res)=>{
-    const { email, otp } = req.body
-    const otpData =
-    await OtpModel.findOne({
-        email,
-        otp,
-        purpose:'REGISTER'
-
-    })
-    if(!otpData){
-        return res.status(400).json({
-            message:'Invalid OTP'
-        })
-
-    }
-
-    if(
-        otpData.expiresAt <
-        new Date()
-    ){
-
-        return res.status(400).json({
-            message:'OTP expired'
-        })
-
-    }
-
-    await UserModel.updateOne(
-
-        { email },
-
-        {
-            isEmailVerified:true
-        }
-
-    )
-
-    await OtpModel.deleteMany({
-        email,
-        purpose:'REGISTER'
-    })
-
-    res.status(200).json({
-        message:'Email verified successfully'
-    })
-
-})
-
-
-// after sending otp lets verify otp 
 CommonApi.post('/verifyotp', async (req, res) => {
+  const email = String(req.body.email || '').trim().toLowerCase();
+  const otp = String(req.body.otp || '').trim();
+  const otpData = await OtpModel.findOne({
+    email,
+    otp,
+    purpose: 'RESET_PASSWORD',
+    expiresAt: { $gt: new Date() },
+  });
 
-    const { email, otp } = req.body
+  if (!otpData) return res.status(400).json({ message: 'Invalid or expired OTP' });
 
-    const otpData = await OtpModel.findOne({
-        email,
-        otp,
-        purpose:'RESET_PASSWORD',
-    })
+  otpData.verified = true;
+  await otpData.save();
+  return res.status(200).json({ message: 'OTP verified' });
+});
 
-    if (!otpData) {
-        return res.status(400).json({
-            message: 'Invalid OTP'
-        })
-    }
-
-    if (otpData.expiresAt < new Date()) {
-        return res.status(400).json({
-            message: 'OTP expired'
-        })
-    }
-
-    otpData.verified = true
-
-    await otpData.save()
-
-    res.status(200).json({
-        message: 'OTP verified'
-    })
-
-})
-// verify and update password
 CommonApi.post('/resetpassword', async (req, res) => {
+  const email = String(req.body.email || '').trim().toLowerCase();
+  const password = req.body.password;
 
-    const { email, password } = req.body
+  if (!email || typeof password !== 'string' || password.length < 8 || password.length > 128 ||
+      !/[a-z]/.test(password) || !/[A-Z]/.test(password) || !/\d/.test(password) ||
+      !/[@$!%*?&]/.test(password)) {
+    return res.status(400).json({
+      message: 'Password must be 8–128 characters and include uppercase, lowercase, number, and special character',
+    });
+  }
 
-    const verifiedOtp = await OtpModel.findOne({
-        email,
-        verified: true
-    })
+  const verifiedOtp = await OtpModel.findOne({
+    email,
+    purpose: 'RESET_PASSWORD',
+    verified: true,
+    expiresAt: { $gt: new Date() },
+  });
+  if (!verifiedOtp) return res.status(401).json({ message: 'A valid password-reset OTP is required' });
 
-    if (!verifiedOtp) {
-        return res.status(401).json({
-            message: 'OTP verification required'
-        })
-    }
+  const user = await UserModel.findOne({ email });
+  if (!user) return res.status(404).json({ message: 'User not found' });
 
-    const hashedPassword = await hash(password, 12)
-
-    await UserModel.updateOne(
-        { email },
-        { password: hashedPassword }
-    )
-
-    await OtpModel.deleteOne({ email })
-
-    res.status(200).json({
-        message: 'Password reset successful'
-    })
-
-})
+  user.password = await hash(password, 12);
+  await user.save();
+  await OtpModel.deleteMany({ email, purpose: 'RESET_PASSWORD' });
+  return res.status(200).json({ message: 'Password reset successful' });
+});
