@@ -1,48 +1,59 @@
-import { UserModel } from "../models/UserModel.js"
-import {hash,compare} from 'bcryptjs'
-import {config} from 'dotenv'
-import jwt from 'jsonwebtoken'
-config()
+import { UserModel } from '../models/UserModel.js';
+import { hash, compare } from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 
+export const authenticate = async ({ UserObj }) => {
+  if (!UserObj || typeof UserObj.password !== 'string') {
+    const error = new Error('Valid registration details are required');
+    error.status = 400;
+    throw error;
+  }
 
-export const authenticate =async({UserObj})=>{
-    // check if plain password or not
-    await UserModel(UserObj)
-    // register the user if not plain password
-    // hash password
-    let hashedPassword=await hash(UserObj.password,12)
-    // update the plain password
-    UserObj.password=hashedPassword;
-    UserObj.role='USER'
-    // update in database
-    let UserObjDoc = await UserModel(UserObj);
-    let user=await UserObjDoc.save()
-    user.toObject();
-    return {user};
-}
-export const authenticatelogin = async({loginObj})=>{
-    // check does any user exists with the login email
-    const email = loginObj.email;
-    console.log(loginObj)
-    let user = await UserModel.findOne({email:email});
-    console.log(user)
-    if(user === null){
-        const error = new Error('user not found ')
-        error.status=401;
-        throw error;
-        return;
-    }
-    // check or compare password
-    let isValidPass=await compare(loginObj.password,user.password);
-    if(!isValidPass){
-        const error = new Error('password not matched ')
-        error.status=401;
-        throw error;
-        return;
-    }
-    // if matched then create a JWT token 
-    let token=jwt.sign({id:user._id,email:user.email,role:user.role,firstname:user.firstname,lastname:user.lastname,profileImageUrl:user.profileImageUrl},process.env.JWT_SECRET,{expiresIn:'1h'})
-    const userObj = user.toObject();
-    delete userObj.password;
-    return {user:userObj,token}
-}
+  const userData = { ...UserObj, email: String(UserObj.email || '').trim().toLowerCase() };
+  userData.password = await hash(userData.password, 12);
+  userData.role = 'USER';
+
+  const user = await new UserModel(userData).save();
+  const safeUser = user.toObject();
+  delete safeUser.password;
+  return { user: safeUser };
+};
+
+export const authenticatelogin = async ({ loginObj }) => {
+  const email = String(loginObj?.email || '').trim().toLowerCase();
+  const password = loginObj?.password;
+
+  if (!email || typeof password !== 'string' || !password) {
+    const error = new Error('Email and password are required');
+    error.status = 400;
+    throw error;
+  }
+
+  const user = await UserModel.findOne({ email });
+  if (!user || !(await compare(password, user.password))) {
+    const error = new Error('Invalid email or password');
+    error.status = 401;
+    throw error;
+  }
+
+  if (!process.env.JWT_SECRET) {
+    throw new Error('JWT_SECRET is not configured');
+  }
+
+  const token = jwt.sign(
+    {
+      id: user._id.toString(),
+      email: user.email,
+      role: user.role,
+      firstname: user.firstname,
+      lastname: user.lastname,
+      profileImageUrl: user.profileImageUrl,
+    },
+    process.env.JWT_SECRET,
+    { expiresIn: '1h' },
+  );
+
+  const safeUser = user.toObject();
+  delete safeUser.password;
+  return { user: safeUser, token };
+};
