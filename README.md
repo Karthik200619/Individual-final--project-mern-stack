@@ -1,186 +1,95 @@
-# CampusKart - Campus Buy & Sell Platform
+# CampusKart — Campus Buy & Sell Platform
 
-CampusKart is a full-stack MERN marketplace built exclusively for college students. The platform enables students to buy, sell, exchange, and manage products securely within their campus ecosystem using verified institutional email authentication.
-
-## FOR TESTING OF ADMIN USE this mail and PASSWORD
-* email:admin@anurag.edu.in
-*Password:Admin@1234
-
-## FOR TESTING USER USE 
-* email:23eg112e52@anurag.edu.in
-* password:Test@1234
-
-# IF U WANT TO TEST PRODUCTS LOGIN AS ADMIN AND APPROVE YOUR PRODUCTS
-
-
+CampusKart is a MERN marketplace for college communities. Students can list, discover, and buy items within verified campus communities.
 
 ## Features
 
-### Authentication & Security
+- **Authentication:** JWT sessions, campus email OTP verification, password hashing, and role-based access.
+- **Campus onboarding:** College email-domain validation and approved-campus management.
+- **Marketplace:** Product listings, media uploads, approval workflows, search, filters, and pagination.
+- **Orders and delivery:** Buyer/seller order management, meetup details, and delivery tracking.
+- **Cart and discounts:** Cart management, checkout flow, coupon limits, and expiry validation.
+- **Communication:** Buyer/seller conversations and in-app notifications.
+- **Support:** Feedback, help queries, and order-dispute workflows.
 
-* JWT-based authentication
-* Campus email verification using OTP
-* Secure password hashing with bcrypt
-* Protected routes using middleware
-* Role-based access (User/Admin)
+## Tech stack
 
-### Campus Verification
+- **Frontend:** React, React Router, Axios, Zustand, Tailwind CSS, Bootstrap, Vite
+- **Backend:** Node.js, Express, JWT, Multer, Nodemailer, Cloudinary
+- **Database:** MongoDB Atlas with Mongoose
+- **Services:** Cloudinary media storage and Brevo SMTP
 
-* College-specific registration
-* Email domain validation
-* Approved campus onboarding
-* Campus-restricted marketplace access
+## Repository structure
 
-### Marketplace
+```text
+frontend/   React application
+  src/
+    components/
+    store/
+    assets/
+backend/    Express API
+  APIs/
+  models/
+  middlewares/
+  config/
+  Service/
+  server.js
+```
 
-* Create item listings
-* Upload images and videos
-* Product approval workflow
-* Category-based browsing
-* Search and filtering
-* Infinite scrolling and pagination
+## Requirements
 
-### Orders & Delivery
+- Node.js compatible with the installed Vite and backend dependency versions
+- npm
+- MongoDB connection string
+- Cloudinary credentials and SMTP credentials if those integrations are used
 
-* Buy products from students
-* Order management
-* Delivery tracking
-* Meetup location support
-* Order acceptance and rejection
+## Environment setup
 
-### Cart System
+Create a private `.env` file in `backend/` and set the values required by the backend:
 
-* Add to cart
-* Update quantity
-* Remove items
-* Checkout support
-
-### Communication
-
-* Real-time buyer-seller messaging
-* Conversation history
-* Product-specific chats
-
-### Notifications
-
-* In-app notifications
-* Order updates
-* Stock alerts
-* Help center notifications
-
-### Discount System
-
-* Coupon management
-* Category-specific discounts
-* Usage limits
-* Expiry validation
-
-### Help Center
-
-* Feedback submission
-* Query management
-* Post-order dispute handling
-
-## Tech Stack
-
-### Frontend
-
-* React.js
-* React Router
-* React Hook Form
-* Axios
-* Tailwind CSS
-
-### Backend
-
-* Node.js
-* Express.js
-* JWT Authentication
-* Multer
-* Busboy
-
-### Database
-
-* MongoDB Atlas
-* Mongoose
-
-### Cloud Services
-
-* Cloudinary
-* Brevo SMTP
-
-## Project Structure
-
-frontend/
-├── src/
-│   ├── components/
-│   ├── pages/
-│   ├── store/
-│   ├── routes/
-│   └── assets/
-
-backend/
-├── APIs/
-├── models/
-├── config/
-├── middlewares/
-├── Service/
-└── server.js
-
-## Environment Variables
-
-Backend:
-
-MONGO_URI=
-JWT_SECRET=
-CLOUDINARY_CLOUD_NAME=
-CLOUDINARY_API_KEY=
-CLOUDINARY_API_SECRET=
+```dotenv
+PORT=5000
+DB_URL=mongodb+srv://...
+JWT_SECRET=replace-with-a-long-random-secret
+CLOUD_NAME=
+API_KEY=
+API_SECRET=
 EMAIL_USER=
 EMAIL_PASS=
+CLIENT_ORIGIN=https://individual-final-project-mern-stack.vercel.app
+```
 
-## Installation
+Use a locally generated random secret for `JWT_SECRET`. Never commit real credentials or share production environment files. Variable names must match the ones used by the code and the hosting environment.
 
-### Clone Repository
+## Run locally
 
-git clone <repository-url>
+Open two terminals from the repository root.
 
-### Backend
+**Backend**
 
+```bash
 cd backend
 npm install
 npm run dev
+```
 
-### Frontend
+**Frontend**
 
+```bash
 cd frontend
 npm install
 npm run dev
+```
 
-## Deployment
+Configure the frontend API base URLs for your local backend when needed. The deployed frontend origin can be changed with `CLIENT_ORIGIN`.
 
-Frontend: Render / Vercel
+## Security notes
 
-Backend: Render
-
-Database: MongoDB Atlas
-
-Media Storage: Cloudinary
-
-SMTP: Brevo
-
-## Future Improvements
-
-* Real-time notifications using Socket.IO
-* Payment gateway integration
-* Campus moderation dashboard
-* Product recommendation engine
-* AI-assisted search
-
-
+- Do not publish test-account passwords, access tokens, database URLs, API keys, or SMTP credentials.
+- Rotate any credential that has ever been committed publicly; removing it from the latest version does not erase it from Git history.
+- Create test accounts through the registration flow rather than relying on shared public credentials.
+- Keep production secrets in the hosting provider's environment-variable settings.
 
 ## Author
 
-Karthik
-
-Final Year MERN Stack Project
+Karthik — Final Year MERN Stack Project
