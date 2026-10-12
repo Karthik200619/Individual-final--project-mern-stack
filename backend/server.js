@@ -1,100 +1,93 @@
-import exp from 'express'
-import cookieParser from 'cookie-parser'
-import { connect } from 'mongoose'
-import { config } from 'dotenv'
-import cors from 'cors'
-import { UserApi } from './APIs/UserApi.js'
-import { AdminApi } from './APIs/AdminApi.js'
-import { CommonApi } from './APIs/CommonApi.js'
-config()
+import express from 'express';
+import cookieParser from 'cookie-parser';
+import mongoose from 'mongoose';
+import dotenv from 'dotenv';
+import cors from 'cors';
+import { UserApi } from './APIs/UserApi.js';
+import { AdminApi } from './APIs/AdminApi.js';
+import { CommonApi } from './APIs/CommonApi.js';
 
-const app = exp()
+dotenv.config();
 
-// middleware's
-// 1.body-parser middleware
-app.use(exp.json())
-// 2.cookie-parser middleware
-app.use(cookieParser())
-//
+const app = express();
+const port = Number(process.env.PORT) || 5000;
+const allowedOrigins = (process.env.CLIENT_ORIGIN || 'https://individual-final-project-mern-stack.vercel.app')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+app.disable('x-powered-by');
 app.use(cors({
-    origin: ['https://individual-final-project-mern-stack.vercel.app'],
-    credentials: true
-    
-}))
+  origin(origin, callback) {
+    // Allow non-browser clients (curl, health checks) without an Origin header.
+    if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
+    return callback(new Error('Origin not allowed by CORS'));
+  },
+  credentials: true,
+}));
+app.use(express.json({ limit: '1mb' }));
+app.use(cookieParser());
 
-// API's
-app.use('/user-api', UserApi)
-app.use('/admin-api', AdminApi)
-app.use('/common-api', CommonApi)
-
-
-// function to connect Database
-const connectDB = async () => {
-    try {
-        await connect(process.env.DB_URL)
-        console.log('connected to Database successfully')
-        // listen takes in total 2 Parameters one is PORT No and another is call back 
-        app.listen(process.env.PORT, () => {
-            console.log(`server started at PORT ${process.env.PORT}`)
-        })
-    } catch (err) {
-        console.log(err)
-    }
-}
-connectDB()
-
-//dealing with invalid path
-app.use((req, res, next) => {
-    console.log(req.url);
-    res.json({ message: `${req.url} is invalid path` });
+app.get('/health', (_req, res) => {
+  res.status(200).json({
+    status: 'ok',
+    database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
+  });
 });
 
-//error handling middleware
-app.use((err, req, res, next) => {
-    console.log("Error name:", err.name);
-    console.log("Error code:", err.code);
-    console.log("Full error:", err);
+app.use('/user-api', UserApi);
+app.use('/admin-api', AdminApi);
+app.use('/common-api', CommonApi);
 
-    // mongoose validation error
-    if (err.name === "ValidationError") {
-        return res.status(400).json({
-            message: "error occurred",
-            error: err.message,
-        });
-    }
+// Keep the not-found handler after all routes.
+app.use((req, res) => {
+  res.status(404).json({ message: 'Route not found', path: req.originalUrl });
+});
 
-    // mongoose cast error
-    if (err.name === "CastError") {
-        return res.status(400).json({
-            message: "error occurred",
-            error: err.message,
-        });
-    }
+// Central error handler. Avoid returning stack traces or internal details to clients.
+app.use((err, _req, res, _next) => {
+  if (err.name === 'ValidationError' || err.name === 'CastError') {
+    return res.status(400).json({ message: 'Invalid request', error: err.message });
+  }
 
-    const errCode = err.code ?? err.cause?.code ?? err.errorResponse?.code;
-    const keyValue = err.keyValue ?? err.cause?.keyValue ?? err.errorResponse?.keyValue;
-
-    if (errCode === 11000) {
-        const field = Object.keys(keyValue)[0];
-        const value = keyValue[field];
-        return res.status(409).json({
-            message: "error occurred",
-            error: `${field} "${value}" already exists`,
-        });
-    }
-
-    // ✅ HANDLE CUSTOM ERRORS
-    if (err.status) {
-        return res.status(err.status).json({
-            message: "error occurred",
-            error: err.message,
-        });
-    }
-
-    // default server error
-    res.status(500).json({
-        message: "error occurred",
-        error: "Server side error",
+  const errCode = err.code ?? err.cause?.code ?? err.errorResponse?.code;
+  if (errCode === 11000) {
+    const keyValue = err.keyValue ?? err.cause?.keyValue ?? err.errorResponse?.keyValue ?? {};
+    const field = Object.keys(keyValue)[0];
+    return res.status(409).json({
+      message: 'A record with this value already exists',
+      ...(field ? { field } : {}),
     });
+  }
+
+  if (err.status && err.status >= 400 && err.status < 500) {
+    return res.status(err.status).json({ message: err.message || 'Request failed' });
+  }
+
+  // Log server-side details for debugging, but do not expose them in API responses.
+  console.error('Unhandled API error:', err);
+  return res.status(500).json({ message: 'Internal server error' });
 });
 
+async function start() {
+  if (!process.env.DB_URL) {
+    throw new Error('Missing required environment variable: DB_URL');
+  }
+  if (!process.env.JWT_SECRET) {
+    throw new Error('Missing required environment variable: JWT_SECRET');
+  }
+
+  await mongoose.connect(process.env.DB_URL);
+  console.log('Connected to MongoDB');
+
+  app.listen(port, () => {
+    console.log(`CampusKart API listening on port ${port}`);
+  });
+}
+
+start().catch((err) => {
+  console.error('Failed to start CampusKart API:', err.message);
+  process.exitCode = 1;
+});
+
+export default app;
