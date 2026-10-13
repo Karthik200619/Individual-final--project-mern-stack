@@ -510,6 +510,8 @@ UserApi.post("/buyitem/:itemId", VerifyToken, async (req, res) => {
 
             meetupLocation,
 
+            locationCoordinates,
+
             paymentMethod,
 
             deliveryInstructions,
@@ -637,6 +639,10 @@ UserApi.post("/buyitem/:itemId", VerifyToken, async (req, res) => {
             deliveryType,
 
             meetupLocation,
+
+            locationCoordinates: locationCoordinates && Number.isFinite(Number(locationCoordinates.lat)) && Number.isFinite(Number(locationCoordinates.lng))
+                ? { lat: Number(locationCoordinates.lat), lng: Number(locationCoordinates.lng) }
+                : undefined,
 
             deliveryInstructions,
 
