@@ -9,6 +9,7 @@ function Register() {
   const navigate = useNavigate()
   const { handleSubmit, register } = useForm({ defaultValues: { campus: '' } })
   const [campuses, setCampuses] = useState([])
+  const [campusesLoading, setCampusesLoading] = useState(true)
   const onDone = async (data) => {
     try {
 
@@ -39,13 +40,17 @@ function Register() {
           'https://individual-final-project-mern-stack.onrender.com/user-api/campuses'
         )
 
-        setCampuses(res.data.payload)
+        const campusList = Array.isArray(res.data?.payload) ? res.data.payload : []
+        setCampuses(campusList)
 
       }
       catch (err) {
 
-        console.log(err)
+        console.error('Failed to load campuses:', err)
+        setCampuses([])
 
+      } finally {
+        setCampusesLoading(false)
       }
 
     }
@@ -177,8 +182,8 @@ function Register() {
                 className="w-full h-10 px-3 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-50 rounded-xl text-xs focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-50"
                 required
               >
-                <option value="">Select your campus</option>
-                {campuses.filter((campus) => /^[a-f0-9]{24}$/i.test(String(campus._id || ''))).map((campus) => (
+                <option value="">{campusesLoading ? 'Loading campuses...' : campuses.length ? 'Select your campus' : 'No campuses available'}</option>
+                {campuses.map((campus) => (
                   <option key={campus._id} value={campus._id}>
                     {campus.campusName}
                   </option>
