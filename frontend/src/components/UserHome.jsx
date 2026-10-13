@@ -199,6 +199,28 @@ function UserHome() {
                 </div>
             </div>
 
+            {/* Campus marketplace visual banner */}
+            <section className="relative isolate overflow-hidden rounded-3xl border border-slate-200 dark:border-slate-700 shadow-lg">
+                <img
+                    src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1800&q=85"
+                    alt="Students collaborating on campus"
+                    className="absolute inset-0 -z-20 h-full w-full object-cover"
+                    loading="eager"
+                />
+                <div className="absolute inset-0 -z-10 bg-gradient-to-r from-slate-950/95 via-slate-950/75 to-indigo-950/35" />
+                <div className="max-w-2xl px-6 py-10 md:px-10 md:py-14">
+                    <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-bold text-indigo-100 backdrop-blur">
+                        <span className="h-2 w-2 rounded-full bg-emerald-400" /> Made for campus life
+                    </span>
+                    <h2 className="mt-4 text-2xl font-black leading-tight text-white md:text-4xl">Good finds. Great people. <span className="text-indigo-300">Your campus.</span></h2>
+                    <p className="mt-3 max-w-xl text-sm leading-relaxed text-slate-100 md:text-base">Find a second life for useful things, discover student deals, and coordinate your next handoff right here in your campus community.</p>
+                    <div className="mt-6 flex flex-wrap gap-3">
+                        <button onClick={() => navigate('/allproducts')} className="rounded-xl bg-white px-5 py-3 text-sm font-extrabold text-slate-950 shadow-lg transition hover:-translate-y-0.5 hover:bg-indigo-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white">Explore listings →</button>
+                        <button onClick={() => navigate('/additem')} className="rounded-xl border border-white/40 bg-white/10 px-5 py-3 text-sm font-bold text-white backdrop-blur transition hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white">Sell something</button>
+                    </div>
+                </div>
+            </section>
+
             {/* Quick Actions Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {actions.map((item, index) => (
