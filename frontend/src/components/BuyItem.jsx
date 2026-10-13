@@ -99,13 +99,13 @@ function BuyItem() {
 
     const placeOrder = async () => {
         if (paymentMethod === 'card') {
-            const digits = demoCardNumber.replace(/\\D/g, '')
-            if (!demoCardName.trim() || digits.length < 12 || !/^\\d{2}\\/\\d{2}$/.test(demoCardExpiry) || !/^\\d{3,4}$/.test(demoCardCvv)) {
+            const digits = demoCardNumber.replace(/\D/g, '')
+            if (!demoCardName.trim() || digits.length < 12 || !/^\d{2}\/\d{2}$/.test(demoCardExpiry) || !/^\d{3,4}$/.test(demoCardCvv)) {
                 alert('Enter demo card details to continue. These details are not sent to a payment provider.')
                 return
             }
         }
-        if (paymentMethod === 'upi' && !/^[\\w.\\-]{2,}@[\\w]{2,}$/.test(demoUpiId.trim())) {
+        if (paymentMethod === 'upi' && !/^[\w.\-]{2,}@[\w]{2,}$/.test(demoUpiId.trim())) {
             alert('Enter a demo UPI ID such as student@campuskart.')
             return
         }
@@ -440,7 +440,7 @@ function BuyItem() {
                             Placing Order...
                         </div>
                     ) : (
-                        'Confirm Purchase Order'
+                        'Pay or Place Order'
                     )}
                 </button>
             </div>
