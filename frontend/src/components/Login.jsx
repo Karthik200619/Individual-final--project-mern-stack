@@ -1,22 +1,25 @@
 import React from 'react'
 import { useForm } from 'react-hook-form'
 import { useAuth } from '../store/authStore'
-import { useNavigate } from 'react-router'
+import { useLocation, useNavigate } from 'react-router'
 import { FaLock, FaEnvelope, FaShoppingBag, FaArrowRight } from 'react-icons/fa'
 
 function Login() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { login } = useAuth()
   const { handleSubmit, register } = useForm()
 
   const onceDone = async (data) => {
     try {
-      const user = await login(data);
+      const res = await login(data)
+      const user = res?.data?.payload
+      if (!user) return
+
       if (user.role === "ADMIN") {
-        navigate("/admindashboard");
-      }
-      else {
-        navigate("/userhome");
+        navigate("/admindashboard")
+      } else {
+        navigate("/userhome")
       }
     } catch (error) {
       console.log(error)
@@ -64,6 +67,11 @@ function Login() {
         <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 mb-8">
           Sign in to your campus marketplace account
         </p>
+        {location.state?.message && (
+          <div role="status" className="mb-4 rounded-xl border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700">
+            {location.state.message}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit(onceDone)} className="space-y-5">
           <div>
