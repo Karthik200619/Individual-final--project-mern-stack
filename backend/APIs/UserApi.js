@@ -29,17 +29,14 @@ const upload = multer()
 UserApi.post('/register', upload.single("profileImageUrl"), async (req, res) => {
     try {
         let UserObj = req.body
-        // check existing user
-        const existingUser =
-            await UserModel.findOne({
-                email: UserObj.email
-            })
+        UserObj.email = String(UserObj.email || '').trim().toLowerCase()
+
+        // Give a clear response when the email is already registered.
+        const existingUser = await UserModel.findOne({ email: UserObj.email })
         if (existingUser) {
-
             return res.status(400).json({
-                message: 'User already exists'
+                message: 'Email already exists. Please log in instead.'
             })
-
         }
         // Validate the selected campus ID before querying MongoDB.
         // This prevents malformed form values from causing a BSON cast error and 500 response.
@@ -77,54 +74,12 @@ UserApi.post('/register', upload.single("profileImageUrl"), async (req, res) => 
 
         const result = await uploadResult({ byteArrayBuffer })
         UserObj.profileImageUrl = result.secure_url
-        // user starts as unverified
-        UserObj.isEmailVerified = false
-
-        // create user
-        const { user } =
-            await authenticate({
-                UserObj
-            })
-
-        // generate otp
-        const otp = generateOTP()
-
-        // remove old otp if any
-        await OtpModel.deleteMany({
-            email: user.email
-        })
-
-        // save otp
-        await OtpModel.create({
-            email: user.email, otp, purpose: 'REGISTER', verified: false,
-            expiresAt: new Date(
-                Date.now() + 5 * 60 * 1000
-            )
-        })
-
-        // send email
-        await sendemail(
-
-            user.email,
-
-            'CampusKart Email Verification',
-
-            `
-            <h2>Email Verification</h2>
-            <h1>${otp}</h1>
-            <p>This OTP expires in 5 minutes.</p>
-            `
-        )
+        // Create the account. Registration completes without depending on SMTP availability.
+        const { user } = await authenticate({ UserObj })
 
         res.status(201).json({
-
-            message:
-                'Registration successful. OTP sent to email.',
-
-            payload: {
-                email: user.email
-            }
-
+            message: 'Registration successful. Please log in.',
+            payload: { email: user.email }
         })
 
     }
