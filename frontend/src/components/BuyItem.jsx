@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import MapLocationPicker from './MapLocationPicker'
 import axios from 'axios'
 import { useParams, useNavigate } from 'react-router'
 import {
@@ -19,6 +20,7 @@ function BuyItem() {
     const [deliveryType, setDeliveryType] = useState('pickup')
     const [paymentMethod, setPaymentMethod] = useState('cash')
     const [meetupLocation, setMeetupLocation] = useState('')
+    const [selectedCoordinates, setSelectedCoordinates] = useState(null)
     const [deliveryInstructions, setDeliveryInstructions] = useState('')
     const [locations, setLocations] = useState([])
     const [loading, setLoading] = useState(false)
@@ -99,6 +101,7 @@ function BuyItem() {
                     quantity,
                     deliveryType,
                     meetupLocation,
+                    locationCoordinates: selectedCoordinates,
                     paymentMethod,
                     deliveryInstructions,
                     discountCode: couponApplied ? couponCode.toUpperCase().trim() : undefined
@@ -242,6 +245,27 @@ function BuyItem() {
                                 className="w-full h-11 border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-50 rounded-xl px-3 outline-none text-sm focus:border-indigo-500"
                                 required
                             />
+                        )}
+                    </div>
+
+                    <div className="space-y-3 rounded-2xl border border-slate-200 dark:border-slate-800 p-4">
+                        <div>
+                            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">Pin your meetup point</h3>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Choose a precise spot so the seller can find you easily. Your pin is shared with the seller for this order.</p>
+                        </div>
+                        <MapLocationPicker
+                            selectedLocation={selectedCoordinates}
+                            onSelect={({ lat, lng, address }) => {
+                                setSelectedCoordinates({ lat, lng })
+                                setMeetupLocation(address)
+                            }}
+                        />
+                        {selectedCoordinates && (
+                            <div className="rounded-xl bg-indigo-50 dark:bg-indigo-950/30 px-3 py-2 text-xs text-indigo-700 dark:text-indigo-300">
+                                <strong>Pin selected:</strong> {meetupLocation}
+                                <div className="mt-1 text-[10px] opacity-80">{selectedCoordinates.lat}, {selectedCoordinates.lng}</div>
+                                <button type="button" onClick={() => setSelectedCoordinates(null)} className="mt-2 font-bold underline">Clear map pin</button>
+                            </div>
                         )}
                     </div>
 
