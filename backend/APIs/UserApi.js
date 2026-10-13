@@ -1236,6 +1236,12 @@ UserApi.get(
 
 UserApi.get('/campuses', async (req, res) => {
 
+    // This list is small and should always reflect current approved campuses.
+    // Disable conditional caching so clients do not receive a body-less 304 response.
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
+    res.set('Pragma', 'no-cache')
+    res.set('Expires', '0')
+
     try {
 
         const campuses = await CampusModel.find({
