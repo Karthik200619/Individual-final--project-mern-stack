@@ -10,24 +10,23 @@ function Register() {
   const { handleSubmit, register } = useForm({ defaultValues: { campus: '' } })
   const [campuses, setCampuses] = useState([])
   const [campusesLoading, setCampusesLoading] = useState(true)
+  const [submitError, setSubmitError] = useState('')
+  const [submitting, setSubmitting] = useState(false)
   const onDone = async (data) => {
+    setSubmitError('')
+    setSubmitting(true)
     try {
-
-      const res = await registeruser(data)
-
-      if (res) {
-
-        navigate('/verifyotp', {
-          state: {
-            email: data.email,
-            purpose: 'REGISTER'
-          }
-        })
-
-      }
-
+      await registeruser(data)
+      navigate('/login', {
+        state: { message: 'Registration successful. Please log in with your new account.' }
+      })
     } catch (err) {
-      console.log(err)
+      setSubmitError(
+        err.response?.data?.message ||
+        'Registration failed. Please check your details and try again.'
+      )
+    } finally {
+      setSubmitting(false)
     }
   }
   useEffect(() => {
@@ -102,6 +101,16 @@ function Register() {
         </p>
 
         <form onSubmit={handleSubmit(onDone)} encType="multipart/form-data" className="space-y-4">
+          {submitError && (
+            <div role="alert" className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+              {submitError}
+              {submitError.toLowerCase().includes('email already exists') && (
+                <button type="button" onClick={() => navigate('/login')} className="ml-1 font-semibold underline">
+                  Go to login
+                </button>
+              )}
+            </div>
+          )}
 
           <div className="grid grid-cols-2 gap-3">
             <div>
@@ -203,9 +212,9 @@ function Register() {
             </label>
           </div>
 
-          <button type="submit"
-            className="w-full h-11 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl shadow-md shadow-indigo-100 dark:shadow-none transition duration-300 transform active:scale-95">
-            Create account
+          <button type="submit" disabled={submitting}
+            className="w-full h-11 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-xl shadow-md shadow-indigo-100 dark:shadow-none transition duration-300 transform active:scale-95">
+            {submitting ? 'Creating account...' : 'Create account'}
           </button>
         </form>
 
