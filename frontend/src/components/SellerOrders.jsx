@@ -186,10 +186,15 @@ function SellerOrders() {
                                     </div>
                                 </div>
 
-                                <div className='mt-2.5'>
-                                    <span className='px-2.5 py-0.5 bg-slate-100 text-slate-600 rounded-full text-[10px] font-bold capitalize'>
-                                        Order Status: {order.status}
+                                <div className='mt-3 flex flex-wrap items-center gap-2'>
+                                    <span className={`px-3 py-1 rounded-full text-[10px] font-bold capitalize ${order.status === 'accepted' || order.status === 'completed' ? 'bg-emerald-50 text-emerald-700' : order.status === 'rejected' || order.status === 'cancelled' ? 'bg-rose-50 text-rose-700' : 'bg-amber-50 text-amber-700'}`}>
+                                        Order · {order.status?.replaceAll('_', ' ')}
                                     </span>
+                                    {order.delivery && (
+                                        <span className={`px-3 py-1 rounded-full text-[10px] font-bold capitalize ${['delivered', 'completed'].includes(order.delivery.status) ? 'bg-emerald-50 text-emerald-700' : order.delivery.status === 'cancelled' ? 'bg-rose-50 text-rose-700' : 'bg-indigo-50 text-indigo-700'}`}>
+                                            Delivery · {order.delivery.status?.replaceAll('_', ' ')}
+                                        </span>
+                                    )}
                                 </div>
 
                                 {/* Order Action Buttons */}
