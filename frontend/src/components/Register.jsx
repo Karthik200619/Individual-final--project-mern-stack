@@ -178,7 +178,7 @@ function Register() {
                 required
               >
                 <option value="">Select your campus</option>
-                {campuses.filter((campus) => /^[a-f\\d]{24}$/i.test(String(campus._id || ''))).map((campus) => (
+                {campuses.filter((campus) => /^[a-f0-9]{24}$/i.test(String(campus._id || ''))).map((campus) => (
                   <option key={campus._id} value={campus._id}>
                     {campus.campusName}
                   </option>
