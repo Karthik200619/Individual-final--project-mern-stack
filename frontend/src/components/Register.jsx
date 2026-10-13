@@ -7,7 +7,7 @@ import axios from 'axios'
 function Register() {
   const { registeruser } = useAuth()
   const navigate = useNavigate()
-  const { handleSubmit, register } = useForm()
+  const { handleSubmit, register } = useForm({ defaultValues: { campus: '' } })
   const [campuses, setCampuses] = useState([])
   const onDone = async (data) => {
     try {
@@ -177,7 +177,8 @@ function Register() {
                 className="w-full h-10 px-3 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-50 rounded-xl text-xs focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-50"
                 required
               >
-                {campuses.map((campus) => (
+                <option value="">Select your campus</option>
+                {campuses.filter((campus) => /^[a-f\\d]{24}$/i.test(String(campus._id || ''))).map((campus) => (
                   <option key={campus._id} value={campus._id}>
                     {campus.campusName}
                   </option>
