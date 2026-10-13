@@ -41,6 +41,14 @@ UserApi.post('/register', upload.single("profileImageUrl"), async (req, res) => 
             })
 
         }
+        // Validate the selected campus ID before querying MongoDB.
+        // This prevents malformed form values from causing a BSON cast error and 500 response.
+        if (!mongoose.Types.ObjectId.isValid(String(UserObj.campus || ''))) {
+            return res.status(400).json({
+                message: 'Please select a valid campus'
+            })
+        }
+
         // get campus details
         const campus = await CampusModel.findById(UserObj.campus)
         if (!campus) {
