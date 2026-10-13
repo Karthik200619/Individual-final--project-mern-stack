@@ -1,7 +1,14 @@
 import mongoose from 'mongoose'
+import dotenv from 'dotenv'
 import { CampusModel } from '../models/CampusModel.js'
 
-await mongoose.connect('mongodb://localhost:27017/newfinaldb')
+dotenv.config()
+
+if (!process.env.DB_URL) {
+    throw new Error('Missing DB_URL. Set it in backend/.env before seeding campuses.')
+}
+
+await mongoose.connect(process.env.DB_URL)
 
 
 const campuses = [
@@ -284,10 +291,14 @@ const campuses = [
 
 ]
 
-await CampusModel.deleteMany()
+// Upsert by campus name: safe to rerun and does not delete existing campus records.
+for (const campus of campuses) {
+    await CampusModel.updateOne(
+        { campusName: campus.campusName },
+        { $set: campus },
+        { upsert: true, runValidators: true }
+    )
+}
 
-await CampusModel.insertMany(campuses)
-
-console.log('Campuses seeded successfully')
-
-process.exit()
+console.log(`Campus seed complete. Processed ${campuses.length} campuses.`)
+await mongoose.disconnect()
