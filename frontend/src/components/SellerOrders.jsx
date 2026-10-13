@@ -169,6 +169,15 @@ function SellerOrders() {
                                         <p className='text-xs text-gray-500 mt-0.5'>
                                             Quantity: {order.quantity}
                                         </p>
+                                        {order.delivery?.meetupLocation && (
+                                            <div className='mt-2 rounded-xl bg-slate-50 border border-slate-100 p-3'>
+                                                <p className='text-[10px] font-bold uppercase tracking-wide text-slate-500'>Buyer meetup location</p>
+                                                <p className='text-xs text-slate-700 mt-1 break-words'>{order.delivery.meetupLocation}</p>
+                                                {Number.isFinite(order.delivery.locationCoordinates?.lat) && Number.isFinite(order.delivery.locationCoordinates?.lng) && (
+                                                    <a className='inline-flex mt-2 text-xs font-bold text-indigo-600 hover:text-indigo-800 underline' href={`https://www.google.com/maps?q=${order.delivery.locationCoordinates.lat},${order.delivery.locationCoordinates.lng}`} target='_blank' rel='noreferrer'>Open pinned location in Maps ↗</a>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
                                     <div>
                                         <span className='text-indigo-600 font-semibold text-sm'>
