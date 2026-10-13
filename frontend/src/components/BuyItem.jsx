@@ -19,6 +19,11 @@ function BuyItem() {
     const [quantity, setQuantity] = useState(1)
     const [deliveryType, setDeliveryType] = useState('pickup')
     const [paymentMethod, setPaymentMethod] = useState('cash')
+    const [demoCardName, setDemoCardName] = useState('')
+    const [demoCardNumber, setDemoCardNumber] = useState('')
+    const [demoCardExpiry, setDemoCardExpiry] = useState('')
+    const [demoCardCvv, setDemoCardCvv] = useState('')
+    const [demoUpiId, setDemoUpiId] = useState('')
     const [meetupLocation, setMeetupLocation] = useState('')
     const [selectedCoordinates, setSelectedCoordinates] = useState(null)
     const [deliveryInstructions, setDeliveryInstructions] = useState('')
@@ -93,9 +98,25 @@ function BuyItem() {
     }
 
     const placeOrder = async () => {
+        if (paymentMethod === 'card') {
+            const digits = demoCardNumber.replace(/\\D/g, '')
+            if (!demoCardName.trim() || digits.length < 12 || !/^\\d{2}\\/\\d{2}$/.test(demoCardExpiry) || !/^\\d{3,4}$/.test(demoCardCvv)) {
+                alert('Enter demo card details to continue. These details are not sent to a payment provider.')
+                return
+            }
+        }
+        if (paymentMethod === 'upi' && !/^[\\w.\\-]{2,}@[\\w]{2,}$/.test(demoUpiId.trim())) {
+            alert('Enter a demo UPI ID such as student@campuskart.')
+            return
+        }
+
         try {
             setLoading(true)
-            await axios.post(
+            // Small delay to make the prototype checkout feel like a payment confirmation.
+            if (paymentMethod !== 'cash') {
+                await new Promise(resolve => setTimeout(resolve, 900))
+            }
+            const orderResponse = await axios.post(
                 `https://individual-final-project-mern-stack.onrender.com/user-api/buyitem/${itemId}`,
                 {
                     quantity,
@@ -121,7 +142,12 @@ function BuyItem() {
                 console.log('Not in cart or failed removing:', cartErr.message)
             }
 
-            alert('Order placed successfully!')
+            if (paymentMethod === 'cash') {
+                alert('Order placed successfully! Payment will be handled at the meetup.')
+            } else {
+                const reference = orderResponse.data?.payload?.demoTransactionId || 'CK-DEMO'
+                alert(`Demo payment successful! No real money was charged. Reference: ${reference}`)
+            }
             navigate('/orders')
         }
         catch (err) {
@@ -269,19 +295,67 @@ function BuyItem() {
                         )}
                     </div>
 
-                    {/* Payment Method */}
-                    <div>
-                        <label className="flex items-center gap-1.5 text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
-                            <FaMoneyBillWave className="text-indigo-550" /> Payment Method
-                        </label>
-                        <select
-                            value={paymentMethod}
-                            onChange={(e) => setPaymentMethod(e.target.value)}
-                            className="w-full h-11 border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-50 rounded-xl px-3 outline-none text-sm focus:border-indigo-500"
-                        >
-                            <option value="cash">Cash on Meetup</option>
-                            <option value="upi">UPI Transfer</option>
-                        </select>
+                    {/* Prototype payment gateway */}
+                    <div className="rounded-2xl border border-indigo-200 dark:border-indigo-900 bg-gradient-to-br from-indigo-50 to-white dark:from-indigo-950/40 dark:to-slate-900 p-4 space-y-4">
+                        <div className="flex items-start justify-between gap-3">
+                            <div>
+                                <h3 className="text-sm font-extrabold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                                    <FaMoneyBillWave className="text-indigo-600 dark:text-indigo-400" /> Secure checkout
+                                </h3>
+                                <p className="text-xs text-slate-600 dark:text-slate-300 mt-1">Choose a payment option for this prototype.</p>
+                            </div>
+                            <span className="shrink-0 rounded-full bg-amber-100 dark:bg-amber-900/50 px-2.5 py-1 text-[10px] font-extrabold text-amber-800 dark:text-amber-200">DEMO MODE</span>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                            {[
+                                { value: 'upi', label: 'UPI', detail: 'Demo UPI ID', icon: '↗' },
+                                { value: 'card', label: 'Card', detail: 'Fake card details', icon: '▣' },
+                                { value: 'cash', label: 'Cash', detail: 'Pay at meetup', icon: '₹' }
+                            ].map(option => (
+                                <button key={option.value} type="button" onClick={() => setPaymentMethod(option.value)}
+                                    className={`rounded-xl border p-3 text-left transition ${paymentMethod === option.value ? 'border-indigo-600 bg-indigo-100 dark:bg-indigo-900/60 ring-2 ring-indigo-500/20' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 hover:border-indigo-300'}`}>
+                                    <span className="text-lg font-black text-indigo-600 dark:text-indigo-300">{option.icon}</span>
+                                    <span className="block text-sm font-bold text-slate-900 dark:text-slate-100 mt-1">{option.label}</span>
+                                    <span className="block text-[10px] text-slate-600 dark:text-slate-300">{option.detail}</span>
+                                </button>
+                            ))}
+                        </div>
+                        {paymentMethod === 'upi' && (
+                            <div className="space-y-2">
+                                <label className="block text-xs font-bold text-slate-700 dark:text-slate-200">Demo UPI ID</label>
+                                <input value={demoUpiId} onChange={e => setDemoUpiId(e.target.value)} placeholder="student@campuskart"
+                                    className="w-full h-11 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white px-3 text-sm outline-none focus:border-indigo-500" />
+                                <p className="text-[11px] text-slate-600 dark:text-slate-300">No UPI app opens and no payment is sent.</p>
+                            </div>
+                        )}
+                        {paymentMethod === 'card' && (
+                            <div className="space-y-3">
+                                <label className="block text-xs font-bold text-slate-700 dark:text-slate-200">Cardholder name</label>
+                                <input value={demoCardName} onChange={e => setDemoCardName(e.target.value)} placeholder="CampusKart Demo"
+                                    autoComplete="off" className="w-full h-10 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white px-3 text-sm outline-none focus:border-indigo-500" />
+                                <label className="block text-xs font-bold text-slate-700 dark:text-slate-200">Demo card number</label>
+                                <input value={demoCardNumber} onChange={e => setDemoCardNumber(e.target.value)} placeholder="4242 4242 4242 4242" inputMode="numeric" autoComplete="off"
+                                    className="w-full h-10 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white px-3 text-sm outline-none focus:border-indigo-500" />
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1">Expiry (MM/YY)</label>
+                                        <input value={demoCardExpiry} onChange={e => setDemoCardExpiry(e.target.value)} placeholder="12/28" autoComplete="off"
+                                            className="w-full h-10 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white px-3 text-sm outline-none focus:border-indigo-500" />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1">CVV</label>
+                                        <input value={demoCardCvv} onChange={e => setDemoCardCvv(e.target.value)} placeholder="123" inputMode="numeric" autoComplete="off"
+                                            className="w-full h-10 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white px-3 text-sm outline-none focus:border-indigo-500" />
+                                    </div>
+                                </div>
+                                <p className="text-[11px] text-slate-600 dark:text-slate-300">Use fake details only. These fields stay in this page and are never sent to the backend.</p>
+                            </div>
+                        )}
+                        {paymentMethod === 'cash' && <p className="text-xs text-slate-600 dark:text-slate-300">Pay the seller in person when you meet. No online payment simulation is needed.</p>}
+                        <div className="flex items-center gap-2 text-[11px] text-slate-600 dark:text-slate-300">
+                            <span className="text-emerald-600 dark:text-emerald-400">●</span>
+                            <span>Prototype only · no real money · no payment provider connected</span>
+                        </div>
                     </div>
 
                     {/* Instructions */}
