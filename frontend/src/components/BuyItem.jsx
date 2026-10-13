@@ -440,7 +440,7 @@ function BuyItem() {
                             Placing Order...
                         </div>
                     ) : (
-                        'Pay or Place Order'
+                        paymentMethod === 'cash' ? 'Place Order' : 'Pay ₹' + finalTotal + ' (Demo)'
                     )}
                 </button>
             </div>
