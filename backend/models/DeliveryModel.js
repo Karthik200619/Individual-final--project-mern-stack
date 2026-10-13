@@ -24,6 +24,11 @@ const DeliverySchema = new Schema({
         required:true
     },
 
+    locationCoordinates: {
+        lat: { type: Number },
+        lng: { type: Number }
+    },
+
     deliveryInstructions:{
         type:String,
         default:''
