@@ -6,95 +6,98 @@ import cors from 'cors'
 import { UserApi } from './APIs/UserApi.js'
 import { AdminApi } from './APIs/AdminApi.js'
 import { CommonApi } from './APIs/CommonApi.js'
+
 config()
 
 const app = exp()
 
-// middleware's
-// 1.body-parser middleware
-app.use(exp.json())
-// 2.cookie-parser middleware
-app.use(cookieParser())
-//
+// Keep the deployed frontend and local development origins in sync with the API.
+// CLIENT_ORIGIN can contain a comma-separated list of additional exact origins.
+const configuredOrigins = (process.env.CLIENT_ORIGIN || '')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean)
+
+const allowedOrigins = new Set([
+    'https://individual-final-project-mern-stack.vercel.app',
+    'https://individual-final--project-mern-stack.vercel.app',
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+    ...configuredOrigins
+])
+
+const isCampusKartVercelPreview = (origin) =>
+    /^https:\/\/individual-final--?project-mern-stack(?:-[a-z0-9-]+)?\.vercel\.app$/i.test(origin)
+
+app.disable('x-powered-by')
+
+// CORS must run before the API routers so preflight OPTIONS requests are handled too.
 app.use(cors({
-    origin: ['https://individual-final-project-mern-stack.vercel.app'],
+    origin(origin, callback) {
+        // Requests without Origin (e.g. server-to-server/health checks) are not browser CORS requests.
+        if (!origin || allowedOrigins.has(origin) || isCampusKartVercelPreview(origin)) {
+            return callback(null, true)
+        }
+        return callback(new Error('Origin not allowed by CORS'))
+    },
     credentials: true
-    
 }))
 
-// API's
+// middleware
+app.use(exp.json({ limit: '1mb' }))
+app.use(cookieParser())
+
+// APIs (paths and response formats intentionally unchanged)
 app.use('/user-api', UserApi)
 app.use('/admin-api', AdminApi)
 app.use('/common-api', CommonApi)
 
+// not-found handler
+app.use((req, res) => {
+    res.status(404).json({ message: `${req.originalUrl} is invalid path` })
+})
+
+// error handler
+app.use((err, req, res, next) => {
+    if (err.name === 'ValidationError' || err.name === 'CastError') {
+        return res.status(400).json({ message: 'error occurred', error: err.message })
+    }
+
+    const errCode = err.code ?? err.cause?.code ?? err.errorResponse?.code
+    const keyValue = err.keyValue ?? err.cause?.keyValue ?? err.errorResponse?.keyValue
+
+    if (errCode === 11000) {
+        const field = keyValue ? Object.keys(keyValue)[0] : undefined
+        const value = field ? keyValue[field] : undefined
+        return res.status(409).json({
+            message: 'error occurred',
+            error: field ? `${field} "${value}" already exists` : 'Duplicate value'
+        })
+    }
+
+    if (err.status) {
+        return res.status(err.status).json({ message: 'error occurred', error: err.message })
+    }
+
+    console.error('API error:', err)
+    return res.status(500).json({ message: 'error occurred', error: 'Server side error' })
+})
 
 // function to connect Database
 const connectDB = async () => {
     try {
         await connect(process.env.DB_URL)
         console.log('connected to Database successfully')
-        // listen takes in total 2 Parameters one is PORT No and another is call back 
-        app.listen(process.env.PORT, () => {
-            console.log(`server started at PORT ${process.env.PORT}`)
+        const port = process.env.PORT || 5000
+        app.listen(port, () => {
+            console.log(`server started at PORT ${port}`)
         })
     } catch (err) {
-        console.log(err)
+        console.error('Database connection failed:', err.message)
+        process.exitCode = 1
     }
 }
+
 connectDB()
 
-//dealing with invalid path
-app.use((req, res, next) => {
-    console.log(req.url);
-    res.json({ message: `${req.url} is invalid path` });
-});
-
-//error handling middleware
-app.use((err, req, res, next) => {
-    console.log("Error name:", err.name);
-    console.log("Error code:", err.code);
-    console.log("Full error:", err);
-
-    // mongoose validation error
-    if (err.name === "ValidationError") {
-        return res.status(400).json({
-            message: "error occurred",
-            error: err.message,
-        });
-    }
-
-    // mongoose cast error
-    if (err.name === "CastError") {
-        return res.status(400).json({
-            message: "error occurred",
-            error: err.message,
-        });
-    }
-
-    const errCode = err.code ?? err.cause?.code ?? err.errorResponse?.code;
-    const keyValue = err.keyValue ?? err.cause?.keyValue ?? err.errorResponse?.keyValue;
-
-    if (errCode === 11000) {
-        const field = Object.keys(keyValue)[0];
-        const value = keyValue[field];
-        return res.status(409).json({
-            message: "error occurred",
-            error: `${field} "${value}" already exists`,
-        });
-    }
-
-    // ✅ HANDLE CUSTOM ERRORS
-    if (err.status) {
-        return res.status(err.status).json({
-            message: "error occurred",
-            error: err.message,
-        });
-    }
-
-    // default server error
-    res.status(500).json({
-        message: "error occurred",
-        error: "Server side error",
-    });
-});
-
+export default app
