@@ -52,10 +52,22 @@ const OrderSchema = new Schema({
 
         enum:[
             "cash",
-            "upi"
+            "upi",
+            "card"
         ],
 
         default:"cash"
+    },
+
+    paymentStatus:{
+        type:String,
+        enum:["not_required", "demo_success", "pending", "failed"],
+        default:"not_required"
+    },
+
+    demoTransactionId:{
+        type:String,
+        default:""
     },
 
     status:{
