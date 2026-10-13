@@ -520,6 +520,17 @@ UserApi.post("/buyitem/:itemId", VerifyToken, async (req, res) => {
 
         } = req.body
 
+        const selectedPaymentMethod = ['cash', 'upi', 'card'].includes(paymentMethod) ? paymentMethod : 'cash'
+        if (!['cash', 'upi', 'card'].includes(paymentMethod)) {
+            return res.status(400).json({ message: 'Choose a valid payment method' })
+        }
+
+        // Prototype-only checkout: online methods are simulated and never contact a payment provider.
+        const demoTransactionId = selectedPaymentMethod === 'cash'
+            ? ''
+            : `CK-DEMO-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 7).toUpperCase()}`
+        const paymentStatus = selectedPaymentMethod === 'cash' ? 'not_required' : 'demo_success'
+
         // get item
         const item = await ItemModel
             .findById(itemId)
@@ -625,7 +636,11 @@ UserApi.post("/buyitem/:itemId", VerifyToken, async (req, res) => {
 
             discountAmount,
 
-            paymentMethod,
+            paymentMethod: selectedPaymentMethod,
+
+            paymentStatus,
+
+            demoTransactionId,
 
             status: 'pending'
 
@@ -727,7 +742,7 @@ UserApi.post("/buyitem/:itemId", VerifyToken, async (req, res) => {
 
         res.status(201).json({
 
-            message: 'Order placed successfully',
+            message: selectedPaymentMethod === 'cash' ? 'Order placed successfully' : 'Demo payment successful; no real money was charged',
 
             payload: order
 
