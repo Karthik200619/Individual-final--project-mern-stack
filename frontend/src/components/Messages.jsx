@@ -167,14 +167,14 @@ function Messages() {
     }
 
     return (
-        <div className="max-w-6xl mx-auto h-[82vh] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-3xl overflow-hidden shadow-sm flex flex-col md:flex-row">
+        <div className="max-w-7xl mx-auto h-[78vh] min-h-[560px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-3xl overflow-hidden shadow-sm flex flex-col md:flex-row">
             
             {/* Conversations Sidebar (Left Panel) */}
             <div className="w-full md:w-80 border-r border-slate-200 dark:border-slate-800 flex flex-col h-1/3 md:h-full">
                 <div className="p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex justify-between items-center">
                     <div>
-                        <h2 className="font-extrabold text-slate-900 dark:text-slate-50 text-lg">Chats</h2>
-                        <p className="text-[10px] text-slate-400">Connect with other student buyers & sellers</p>
+                        <h2 className="font-extrabold text-slate-950 dark:text-white text-lg">Chats</h2>
+                        <p className="text-xs text-slate-500 dark:text-slate-300">Connect with other student buyers & sellers</p>
                     </div>
                 </div>
 
@@ -184,7 +184,7 @@ function Messages() {
                             <FaSpinner className="animate-spin text-indigo-600" />
                         </div>
                     ) : conversations.length === 0 ? (
-                        <div className="p-8 text-center text-slate-400 text-xs">
+                        <div className="p-8 text-center text-slate-500 dark:text-slate-300 text-sm">
                             <FaComments className="mx-auto text-2xl mb-2 text-slate-300" />
                             No conversations yet
                         </div>
@@ -193,7 +193,7 @@ function Messages() {
                             <button
                                 key={user._id}
                                 onClick={() => setSelectedUser(user)}
-                                className={`w-full p-4 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-850 transition text-left ${
+                                className={`w-full p-4 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-800 transition text-left ${
                                     selectedUser?._id === user._id ? 'bg-indigo-50/30 dark:bg-indigo-950/20 border-l-4 border-indigo-600' : ''
                                 }`}
                             >
@@ -203,10 +203,10 @@ function Messages() {
                                     className="w-10 h-10 rounded-full object-cover border"
                                 />
                                 <div className="min-w-0 flex-1">
-                                    <span className="block font-bold text-xs text-slate-900 dark:text-slate-50 truncate">
+                                    <span className="block font-bold text-sm text-slate-950 dark:text-white truncate">
                                         {user.firstname} {user.lastname}
                                     </span>
-                                    <span className="block text-[10px] text-slate-400 truncate">
+                                    <span className="block text-xs text-slate-500 dark:text-slate-300 truncate">
                                         {user.email}
                                     </span>
                                 </div>
@@ -229,17 +229,17 @@ function Messages() {
                                     className="w-10 h-10 rounded-full object-cover border"
                                 />
                                 <div>
-                                    <h3 className="font-extrabold text-sm text-slate-900 dark:text-slate-50">
+                                    <h3 className="font-extrabold text-sm text-slate-950 dark:text-white">
                                         {selectedUser.firstname} {selectedUser.lastname}
                                     </h3>
-                                    <span className="text-[10px] text-emerald-500 font-semibold flex items-center gap-1">
+                                    <span className="text-xs text-emerald-500 font-semibold flex items-center gap-1">
                                         <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span> Active
                                     </span>
                                 </div>
                             </div>
                             <button
                                 onClick={() => navigate(`/myitems?userId=${selectedUser._id}`)}
-                                className="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 dark:bg-slate-850 dark:hover:bg-slate-800 text-indigo-600 dark:text-indigo-400 text-[10px] font-bold rounded-lg transition flex items-center gap-1.5 cursor-pointer"
+                                className="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 dark:bg-slate-800 dark:hover:bg-slate-800 text-indigo-600 dark:text-indigo-400 text-xs font-bold rounded-lg transition flex items-center gap-1.5 cursor-pointer"
                             >
                                 <FaBoxOpen /> View Listings
                             </button>
@@ -247,15 +247,15 @@ function Messages() {
 
                         {/* Optional Listing Context Bar */}
                         {itemContext && itemContext.seller._id === selectedUser._id && (
-                            <div className="bg-white dark:bg-slate-900 px-4 py-2.5 border-b border-slate-100 dark:border-slate-850 flex items-center justify-between text-xs">
+                            <div className="bg-white dark:bg-slate-900 px-4 py-2.5 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between text-xs">
                                 <div className="flex items-center gap-2">
-                                    <span className="text-slate-400">Context:</span>
-                                    <span className="font-bold text-slate-800 dark:text-slate-200 truncate max-w-[200px]">{itemContext.title}</span>
+                                    <span className="text-slate-500 dark:text-slate-300">Context:</span>
+                                    <span className="font-bold text-slate-950 dark:text-white truncate max-w-[200px]">{itemContext.title}</span>
                                     <span className="text-indigo-600 dark:text-indigo-400 font-bold">₹{itemContext.price}</span>
                                 </div>
                                 <button 
                                     onClick={() => navigate(`/buy/${itemContext._id}`)}
-                                    className="px-3 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full font-bold text-[10px] transition"
+                                    className="px-3 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full font-bold text-xs transition"
                                 >
                                     Buy Now
                                 </button>
@@ -269,8 +269,8 @@ function Messages() {
                                     <FaSpinner className="animate-spin text-indigo-600 text-2xl" />
                                 </div>
                             ) : messages.length === 0 ? (
-                                <div className="h-full flex flex-col items-center justify-center text-slate-400 text-xs">
-                                    <FaComments size={24} className="text-slate-350 mb-2" />
+                                <div className="h-full flex flex-col items-center justify-center text-slate-500 dark:text-slate-300 text-sm">
+                                    <FaComments size={24} className="text-slate-500 mb-2" />
                                     No messages. Start the conversation!
                                 </div>
                             ) : (
@@ -281,9 +281,9 @@ function Messages() {
                                             key={msg._id} 
                                             className={`flex ${isMine ? 'justify-end' : 'justify-start'}`}
                                         >
-                                            <div className="max-w-[70%] space-y-1">
+                                            <div className="max-w-[82%] sm:max-w-[70%] space-y-1">
                                                 <div 
-                                                    className={`p-3.5 rounded-2xl text-xs leading-relaxed ${
+                                                    className={`p-3.5 rounded-2xl text-sm leading-relaxed ${
                                                         isMine 
                                                             ? 'bg-indigo-600 text-white rounded-tr-none' 
                                                             : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 rounded-tl-none'
@@ -291,7 +291,7 @@ function Messages() {
                                                 >
                                                     {msg.message}
                                                 </div>
-                                                <span className={`block text-[9px] text-slate-400 ${isMine ? 'text-right' : 'text-left'}`}>
+                                                <span className={`block text-[11px] text-slate-500 dark:text-slate-300 ${isMine ? 'text-right' : 'text-left'}`}>
                                                     {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                                 </span>
                                             </div>
@@ -311,24 +311,24 @@ function Messages() {
                                 type="text"
                                 value={typedMessage}
                                 onChange={(e) => setTypedMessage(e.target.value)}
-                                placeholder="Type a message..."
-                                className="flex-1 h-11 px-4 border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-50 rounded-xl text-sm focus:outline-none focus:border-indigo-500"
+                                placeholder="Write a message…" aria-label="Write a message"
+                                className="flex-1 h-12 px-4 border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-950 dark:text-white rounded-xl text-sm focus:outline-none focus:border-indigo-500"
                             />
                             <button
                                 type="submit"
                                 disabled={sending || !typedMessage.trim()}
-                                className="w-11 h-11 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl flex items-center justify-center transition disabled:bg-slate-200 dark:disabled:bg-slate-800 disabled:text-slate-400"
+                                className="w-12 h-12 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl flex items-center justify-center transition disabled:bg-slate-200 dark:disabled:bg-slate-800 disabled:text-slate-500 dark:text-slate-300"
                             >
                                 <FaPaperPlane size={14} />
                             </button>
                         </form>
                     </>
                 ) : (
-                    <div className="flex-1 flex flex-col items-center justify-center text-slate-400 text-xs">
-                        <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-850 flex items-center justify-center text-2xl mb-4 text-slate-400">
+                    <div className="flex-1 flex flex-col items-center justify-center text-slate-500 dark:text-slate-300 text-sm">
+                        <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-2xl mb-4 text-slate-500 dark:text-slate-300">
                             💬
                         </div>
-                        <h3 className="font-extrabold text-slate-800 dark:text-slate-200 text-base mb-1">Your Inbox</h3>
+                        <h3 className="font-extrabold text-slate-950 dark:text-white text-base mb-1">Your Inbox</h3>
                         <p className="text-center max-w-xs leading-relaxed">
                             Select a chat thread from the left list to view messaging logs or coordinate student listings.
                         </p>
