@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
+import { showToast } from '../utils/toast'
 
 function SellerOrders() {
     const [orders, setOrders] = useState([])
@@ -59,11 +60,11 @@ function SellerOrders() {
                         : order
                 )
             )
-            alert('Order accepted successfully!')
+            showToast('Order accepted successfully!', 'success')
             getSellerOrders()
         } catch (err) {
             console.log(err)
-            alert('Failed to accept order')
+            showToast('Failed to accept order', 'error')
         }
     }
 
@@ -84,11 +85,11 @@ function SellerOrders() {
                         : order
                 )
             )
-            alert('Order rejected successfully!')
+            showToast('Order rejected successfully!', 'success')
             getSellerOrders()
         } catch (err) {
             console.log(err)
-            alert('Failed to reject order')
+            showToast('Failed to reject order', 'error')
         }
     }
 
@@ -106,11 +107,11 @@ function SellerOrders() {
                         : order
                 )
             )
-            alert(`Delivery status updated to ${status.replaceAll('_', ' ')}`)
+            showToast(`Delivery status updated to ${status.replaceAll('_', ' ')}`, 'success')
             getSellerOrders()
         } catch (err) {
             console.log(err)
-            alert('Failed to update delivery status')
+            showToast('Failed to update delivery status', 'error')
         }
     }
 
