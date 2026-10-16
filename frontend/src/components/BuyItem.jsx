@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import MapLocationPicker from './MapLocationPicker'
 import axios from 'axios'
+import { showToast } from '../utils/toast'
 import { useParams, useNavigate } from 'react-router'
 import {
     FaArrowLeft,
@@ -86,10 +87,10 @@ function BuyItem() {
             })
             setDiscountPercentage(res.data.payload.discountPercentage)
             setCouponApplied(true)
-            alert(`Coupon applied! ${res.data.payload.discountPercentage}% discount applied.`)
+            showToast(`Coupon applied! ${res.data.payload.discountPercentage}% discount applied.`, 'success')
         } catch (err) {
             console.log(err)
-            alert(err.response?.data?.message || 'Invalid coupon code')
+            showToast(err.response?.data?.message || 'Invalid coupon code', 'error')
             setDiscountPercentage(0)
             setCouponApplied(false)
         } finally {
@@ -101,12 +102,12 @@ function BuyItem() {
         if (paymentMethod === 'card') {
             const digits = demoCardNumber.replace(/\D/g, '')
             if (!demoCardName.trim() || digits.length < 12 || !/^\d{2}\/\d{2}$/.test(demoCardExpiry) || !/^\d{3,4}$/.test(demoCardCvv)) {
-                alert('Enter demo card details to continue. These details are not sent to a payment provider.')
+                showToast('Enter demo card details to continue. These details are not sent to a payment provider.', 'error')
                 return
             }
         }
         if (paymentMethod === 'upi' && !/^[\w.\-]{2,}@[\w]{2,}$/.test(demoUpiId.trim())) {
-            alert('Enter a demo UPI ID such as student@campuskart.')
+            showToast('Enter a demo UPI ID such as student@campuskart.', 'error')
             return
         }
 
@@ -143,16 +144,16 @@ function BuyItem() {
             }
 
             if (paymentMethod === 'cash') {
-                alert('Order placed successfully! Payment will be handled at the meetup.')
+                showToast('Order placed successfully! Payment will be handled at the meetup.', 'success')
             } else {
                 const reference = orderResponse.data?.payload?.demoTransactionId || 'CK-DEMO'
-                alert(`Demo payment successful! No real money was charged. Reference: ${reference}`)
+                showToast(`Demo payment successful! No real money was charged. Reference: ${reference}`, 'success')
             }
             navigate('/orders')
         }
         catch (err) {
             console.log(err)
-            alert(err.response?.data?.message || 'Failed to place order')
+            showToast(err.response?.data?.message || 'Failed to place order', 'error')
         }
         finally {
             setLoading(false)
