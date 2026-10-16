@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form'
 import { useAuth } from '../store/authStore'
 import { useNavigate } from 'react-router'
 import axios from 'axios'
+import { showToast } from '../utils/toast'
 
 function Register() {
   const { registeruser } = useAuth()
@@ -17,10 +18,12 @@ function Register() {
     setSubmitting(true)
     try {
       await registeruser(data)
+      showToast('Account created! You can now sign in.', 'success')
       navigate('/login', {
         state: { message: 'Registration successful. Please log in with your new account.' }
       })
     } catch (err) {
+      showToast(err.response?.data?.message || 'Registration failed. Please check your details.', 'error')
       setSubmitError(
         err.response?.data?.message ||
         'Registration failed. Please check your details and try again.'
