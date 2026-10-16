@@ -2,6 +2,7 @@ import React from 'react'
 import { Outlet, NavLink, useLocation } from 'react-router'
 import Header from './Header'
 import Footer from './Footer'
+import ToastViewport from './ToastViewport'
 import { useAuth } from '../store/authStore'
 import { FaHome, FaSearch, FaPlusCircle, FaBoxOpen, FaShoppingCart, FaComments, FaTruck, FaQuestionCircle, FaCompass } from 'react-icons/fa'
 
@@ -63,6 +64,7 @@ function RootLayout() {
         </main>
       </div>
       <Footer />
+      <ToastViewport />
     </div>
   )
 }
