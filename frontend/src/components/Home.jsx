@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router'
-import { FaRocket, FaShieldAlt, FaMapMarkedAlt, FaArrowRight, FaPlay, FaUsers, FaLeaf, FaBolt } from 'react-icons/fa'
+import { FaRocket, FaShieldAlt, FaMapMarkedAlt, FaArrowRight, FaPlay, FaUsers, FaLeaf, FaBolt, FaShoppingBag } from 'react-icons/fa'
 
 function Home() {
     const navigate = useNavigate()
@@ -41,20 +41,31 @@ function Home() {
     }, [])
 
     return (
-        <div className="py-8 md:py-16 px-4 max-w-7xl mx-auto">
+        <div className="relative isolate min-h-screen overflow-hidden bg-slate-950 text-white">
+            {/* Full-page landing background: video stays behind every landing section while scrolling. */}
+            <div className="pointer-events-none fixed inset-0 z-0 bg-cover bg-center" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=2000&q=85')" }} />
+            {showVideo && (
+                <video className="pointer-events-none fixed inset-0 z-0 h-full w-full object-cover" autoPlay muted loop playsInline preload="metadata" poster="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=2000&q=85" aria-hidden="true">
+                    <source src="https://videos.pexels.com/video-files/5198157/5198157-hd_1920_1080_25fps.mp4" type="video/mp4" />
+                </video>
+            )}
+            <div className="pointer-events-none fixed inset-0 z-0 bg-slate-950/65" />
+            <div className="pointer-events-none fixed inset-0 z-0 bg-gradient-to-br from-indigo-950/65 via-slate-950/45 to-fuchsia-950/45" />
+            <div className="relative z-10 mx-auto max-w-7xl px-4 py-6 sm:px-6 md:px-8">
+                <div className="mb-5 flex items-center justify-between">
+                    <button onClick={() => navigate('/')} className="inline-flex items-center gap-3 rounded-full border border-white/15 bg-black/25 px-4 py-2.5 backdrop-blur-xl transition hover:bg-white/10" aria-label="CampusKart home">
+                        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-500 text-white shadow-lg"><FaShoppingBag /></span>
+                        <span className="text-lg font-black tracking-tight text-white">CampusKart</span>
+                    </button>
+                    <span className="hidden rounded-full border border-white/15 bg-black/25 px-4 py-2 text-xs font-semibold text-slate-200 backdrop-blur-xl sm:inline-flex">Made for student life</span>
+                </div>
             
             {/* Cinematic landing hero: video is only mounted on medium/large screens. */}
-            <section className="campuskart-hero relative isolate mb-16 md:mb-20 min-h-[570px] md:min-h-[650px] overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950 text-white shadow-2xl shadow-indigo-950/20">
-                <div className="absolute inset-0 z-0 bg-cover bg-center" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=2000&q=85')" }} />
-                {showVideo && (
-                    <video className="absolute inset-0 z-0 hidden h-full w-full object-cover md:block" autoPlay muted loop playsInline preload="metadata" poster="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=2000&q=85" aria-hidden="true">
-                        <source src="https://videos.pexels.com/video-files/5198157/5198157-hd_1920_1080_25fps.mp4" type="video/mp4" />
-                    </video>
-                )}
-                <div className="absolute inset-0 z-10 bg-gradient-to-r from-slate-950/95 via-slate-950/75 to-indigo-950/35" />
-                <div className="absolute inset-0 z-10 bg-gradient-to-t from-slate-950/80 via-transparent to-slate-950/20" />
-                <div className="absolute -right-24 -top-24 z-10 h-80 w-80 rounded-full bg-indigo-500/25 blur-3xl" />
-                <div className="absolute bottom-10 right-10 z-10 h-72 w-72 rounded-full bg-fuchsia-500/20 blur-3xl" />
+            <section className="campuskart-hero relative isolate mb-16 md:mb-20 min-h-[570px] md:min-h-[650px] overflow-hidden rounded-[2rem] border border-white/15 bg-black/15 text-white shadow-2xl shadow-indigo-950/20 backdrop-blur-[2px]">
+                <div className="absolute inset-0 z-10 bg-gradient-to-r from-slate-950/65 via-slate-950/45 to-indigo-950/30" />
+                <div className="absolute inset-0 z-10 bg-gradient-to-t from-slate-950/70 via-transparent to-slate-950/15" />
+                <div className="absolute -right-24 -top-24 z-10 h-80 w-80 rounded-full bg-indigo-500/20 blur-3xl" />
+                <div className="absolute bottom-10 right-10 z-10 h-72 w-72 rounded-full bg-fuchsia-500/15 blur-3xl" />
 
                 <div className="relative z-20 flex min-h-[570px] md:min-h-[650px] flex-col justify-center px-6 py-12 sm:px-10 md:px-16 lg:px-20">
                     <div className="mb-7 flex flex-wrap items-center gap-3">
