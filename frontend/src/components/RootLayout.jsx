@@ -30,7 +30,7 @@ function RootLayout() {
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-50 transition-colors duration-300">
-      {!(location.pathname === '/' && !isAuthenticated) && <Header />}
+      {!(!isAuthenticated && ['/', '/login', '/register'].includes(location.pathname)) && <Header />}
       <div className="flex-1 w-full max-w-[1600px] mx-auto md:flex md:items-stretch">
         {showSidebar && (
           <aside className="hidden md:flex w-64 shrink-0 flex-col border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/70 px-4 py-6">
