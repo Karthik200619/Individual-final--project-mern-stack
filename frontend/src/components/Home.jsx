@@ -45,18 +45,18 @@ function Home() {
             
             {/* Cinematic landing hero: video is only mounted on medium/large screens. */}
             <section className="campuskart-hero relative isolate mb-16 md:mb-20 min-h-[570px] md:min-h-[650px] overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950 text-white shadow-2xl shadow-indigo-950/20">
-                <div className="absolute inset-0 -z-20 bg-cover bg-center" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=2000&q=85')" }} />
+                <div className="absolute inset-0 z-0 bg-cover bg-center" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=2000&q=85')" }} />
                 {showVideo && (
-                    <video className="absolute inset-0 -z-10 hidden h-full w-full object-cover md:block" autoPlay muted loop playsInline preload="metadata" poster="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=2000&q=85" aria-hidden="true">
+                    <video className="absolute inset-0 z-0 hidden h-full w-full object-cover md:block" autoPlay muted loop playsInline preload="metadata" poster="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=2000&q=85" aria-hidden="true">
                         <source src="https://videos.pexels.com/video-files/5198157/5198157-hd_1920_1080_25fps.mp4" type="video/mp4" />
                     </video>
                 )}
-                <div className="absolute inset-0 -z-10 bg-gradient-to-r from-slate-950/95 via-slate-950/75 to-indigo-950/35" />
-                <div className="absolute inset-0 -z-10 bg-gradient-to-t from-slate-950/80 via-transparent to-slate-950/20" />
-                <div className="absolute -right-24 -top-24 -z-10 h-80 w-80 rounded-full bg-indigo-500/25 blur-3xl" />
-                <div className="absolute bottom-10 right-10 -z-10 h-72 w-72 rounded-full bg-fuchsia-500/20 blur-3xl" />
+                <div className="absolute inset-0 z-10 bg-gradient-to-r from-slate-950/95 via-slate-950/75 to-indigo-950/35" />
+                <div className="absolute inset-0 z-10 bg-gradient-to-t from-slate-950/80 via-transparent to-slate-950/20" />
+                <div className="absolute -right-24 -top-24 z-10 h-80 w-80 rounded-full bg-indigo-500/25 blur-3xl" />
+                <div className="absolute bottom-10 right-10 z-10 h-72 w-72 rounded-full bg-fuchsia-500/20 blur-3xl" />
 
-                <div className="relative z-10 flex min-h-[570px] md:min-h-[650px] flex-col justify-center px-6 py-12 sm:px-10 md:px-16 lg:px-20">
+                <div className="relative z-20 flex min-h-[570px] md:min-h-[650px] flex-col justify-center px-6 py-12 sm:px-10 md:px-16 lg:px-20">
                     <div className="mb-7 flex flex-wrap items-center gap-3">
                         <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-bold tracking-wide text-white shadow-lg backdrop-blur-xl">
                             <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-400" /> THE CAMPUS MARKETPLACE, REIMAGINED
@@ -97,7 +97,7 @@ function Home() {
                     </div>
                     <p className="mt-6 text-[11px] font-medium tracking-wide text-slate-300/80">A marketplace that feels a little closer to home.</p>
                 </div>
-                <div className="pointer-events-none absolute right-7 top-7 hidden items-center gap-2 rounded-full border border-white/15 bg-black/20 px-3 py-2 text-[10px] font-bold uppercase tracking-[0.18em] text-white/80 backdrop-blur-lg lg:flex">
+                <div className="pointer-events-none absolute right-7 top-7 z-20 hidden items-center gap-2 rounded-full border border-white/15 bg-black/20 px-3 py-2 text-[10px] font-bold uppercase tracking-[0.18em] text-white/80 backdrop-blur-lg lg:flex">
                     <span className="h-1.5 w-1.5 rounded-full bg-emerald-300" /> Campus life in motion
                 </div>
             </section>
