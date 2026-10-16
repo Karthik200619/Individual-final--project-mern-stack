@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form'
 import { useAuth } from '../store/authStore'
 import { useLocation, useNavigate } from 'react-router'
 import { FaLock, FaEnvelope, FaShoppingBag, FaArrowRight } from 'react-icons/fa'
+import { showToast } from '../utils/toast'
 
 function Login() {
   const navigate = useNavigate()
@@ -14,7 +15,10 @@ function Login() {
     try {
       const res = await login(data)
       const user = res?.data?.payload
-      if (!user) return
+      if (!user) {
+        showToast('Sign in failed. Check your email and password, then try again.', 'error')
+        return
+      }
 
       if (user.role === "ADMIN") {
         navigate("/admindashboard")
@@ -23,6 +27,7 @@ function Login() {
       }
     } catch (error) {
       console.log(error)
+      showToast(error.response?.data?.message || 'Unable to sign in right now. Please try again.', 'error')
     }
   }
 
