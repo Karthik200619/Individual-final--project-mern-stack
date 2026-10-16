@@ -103,7 +103,7 @@ function Home() {
             </section>
 
             {/* Premium Image Carousel */}
-            <div className="mb-20 max-w-5xl mx-auto relative group rounded-3xl overflow-hidden shadow-2xl border border-slate-200 dark:border-slate-800">
+            <div className="campuskart-carousel mb-20 max-w-5xl mx-auto relative group rounded-3xl overflow-hidden shadow-2xl border border-slate-200 dark:border-slate-800">
                 <div className="relative h-[250px] md:h-[450px] w-full bg-slate-900">
                     <img
                         src={slides[currentSlide].img}
@@ -130,7 +130,7 @@ function Home() {
             </div>
 
             {/* How it Works / Features */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="campuskart-feature-grid grid grid-cols-1 md:grid-cols-3 gap-8">
                 
                 <div className="bg-white dark:bg-slate-900 p-8 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 hover:shadow-md hover:-translate-y-1 transition duration-300">
                     <div className="w-12 h-12 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xl mb-5">
