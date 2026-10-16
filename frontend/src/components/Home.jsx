@@ -1,10 +1,19 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router'
-import { FaRocket, FaShieldAlt, FaMapMarkedAlt, FaArrowRight } from 'react-icons/fa'
+import { FaRocket, FaShieldAlt, FaMapMarkedAlt, FaArrowRight, FaPlay, FaUsers, FaLeaf, FaBolt } from 'react-icons/fa'
 
 function Home() {
     const navigate = useNavigate()
     const [currentSlide, setCurrentSlide] = useState(0)
+    const [showVideo, setShowVideo] = useState(false)
+
+    useEffect(() => {
+        const media = window.matchMedia('(min-width: 768px) and (prefers-reduced-motion: no-preference)')
+        const updateVideoPreference = () => setShowVideo(media.matches)
+        updateVideoPreference()
+        media.addEventListener?.('change', updateVideoPreference)
+        return () => media.removeEventListener?.('change', updateVideoPreference)
+    }, [])
 
     const slides = [
         {
@@ -34,33 +43,64 @@ function Home() {
     return (
         <div className="py-8 md:py-16 px-4 max-w-7xl mx-auto">
             
-            {/* Hero Section */}
-            <div className="text-center max-w-3xl mx-auto mb-16 animate-float">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 mb-4 border border-indigo-100">
-                  ✨ The ultimate campus marketplace
-                </span>
-                <h1 className="text-4xl md:text-6xl font-extrabold text-gray-900 dark:text-gray-50 tracking-tight leading-none mb-6">
-                    Buy & Sell Within Your <br/>
-                    <span className="bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent">Campus Community</span>
-                </h1>
-                <p className="text-base md:text-lg text-gray-500 max-w-2xl mx-auto leading-relaxed mb-8">
-                    Discover amazing deals from peers, list items in under 2 minutes, and meet up securely at campus delivery spots. Fast, safe, and built exclusively for students.
-                </p>
-                <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
-                    <button
-                        onClick={() => navigate('/register')}
-                        className="w-full sm:w-auto h-12 px-8 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-medium shadow-md shadow-indigo-100 hover:shadow-lg hover:shadow-indigo-200 transition duration-300 flex items-center justify-center gap-2 group"
-                    >
-                        Create Account <FaArrowRight className="text-sm group-hover:translate-x-1 transition-transform" />
-                    </button>
-                    <button
-                        onClick={() => navigate('/login')}
-                        className="w-full sm:w-auto h-12 px-8 rounded-xl bg-white border border-gray-200 text-gray-700 hover:text-indigo-600 hover:border-indigo-200 transition duration-300 font-medium flex items-center justify-center"
-                    >
-                        Sign In
-                    </button>
+            {/* Cinematic landing hero: video is only mounted on medium/large screens. */}
+            <section className="campuskart-hero relative isolate mb-16 md:mb-20 min-h-[570px] md:min-h-[650px] overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950 text-white shadow-2xl shadow-indigo-950/20">
+                <div className="absolute inset-0 -z-20 bg-cover bg-center" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=2000&q=85')" }} />
+                {showVideo && (
+                    <video className="absolute inset-0 -z-10 hidden h-full w-full object-cover md:block" autoPlay muted loop playsInline preload="metadata" poster="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=2000&q=85" aria-hidden="true">
+                        <source src="https://videos.pexels.com/video-files/5198157/5198157-hd_1920_1080_25fps.mp4" type="video/mp4" />
+                    </video>
+                )}
+                <div className="absolute inset-0 -z-10 bg-gradient-to-r from-slate-950/95 via-slate-950/75 to-indigo-950/35" />
+                <div className="absolute inset-0 -z-10 bg-gradient-to-t from-slate-950/80 via-transparent to-slate-950/20" />
+                <div className="absolute -right-24 -top-24 -z-10 h-80 w-80 rounded-full bg-indigo-500/25 blur-3xl" />
+                <div className="absolute bottom-10 right-10 -z-10 h-72 w-72 rounded-full bg-fuchsia-500/20 blur-3xl" />
+
+                <div className="relative z-10 flex min-h-[570px] md:min-h-[650px] flex-col justify-center px-6 py-12 sm:px-10 md:px-16 lg:px-20">
+                    <div className="mb-7 flex flex-wrap items-center gap-3">
+                        <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-bold tracking-wide text-white shadow-lg backdrop-blur-xl">
+                            <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-400" /> THE CAMPUS MARKETPLACE, REIMAGINED
+                        </span>
+                        <span className="hidden sm:inline-flex items-center gap-2 rounded-full border border-white/15 bg-black/20 px-3 py-2 text-xs font-semibold text-slate-200 backdrop-blur-xl">
+                            <FaBolt className="text-amber-300" /> Made for student life
+                        </span>
+                    </div>
+                    <h1 className="campuskart-hero-title max-w-4xl text-4xl font-black leading-[1.04] tracking-tight sm:text-5xl md:text-7xl lg:text-[5.2rem]">
+                        Your campus.<br />
+                        <span className="bg-gradient-to-r from-indigo-300 via-fuchsia-200 to-amber-200 bg-clip-text text-transparent">Your community.</span><br />
+                        <span className="text-white">Better finds.</span>
+                    </h1>
+                    <p className="mt-7 max-w-2xl text-base leading-7 text-slate-200 sm:text-lg md:text-xl md:leading-8">
+                        Buy what you need. Give good things a second life. Meet the people behind every deal — all within your campus community.
+                    </p>
+                    <div className="mt-9 flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
+                        <button onClick={() => navigate('/register')} className="group inline-flex items-center justify-center gap-3 rounded-2xl bg-white px-7 py-4 text-sm font-extrabold text-slate-950 shadow-xl shadow-black/20 transition duration-300 hover:-translate-y-1 hover:bg-indigo-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/40">
+                            Join CampusKart <FaArrowRight className="transition-transform duration-300 group-hover:translate-x-1" />
+                        </button>
+                        <button onClick={() => navigate('/login')} className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/25 bg-white/10 px-7 py-4 text-sm font-bold text-white backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:border-white/50 hover:bg-white/15 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/30">
+                            <FaPlay className="text-[10px]" /> Sign in to explore
+                        </button>
+                    </div>
+                    <div className="mt-12 grid max-w-2xl grid-cols-1 gap-3 sm:grid-cols-3">
+                        <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-black/20 p-3.5 backdrop-blur-xl transition duration-300 hover:bg-white/10">
+                            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-400/20 text-indigo-200"><FaUsers /></span>
+                            <span><strong className="block text-sm font-extrabold">Student-first</strong><span className="text-xs text-slate-300">Built for your campus</span></span>
+                        </div>
+                        <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-black/20 p-3.5 backdrop-blur-xl transition duration-300 hover:bg-white/10">
+                            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-400/20 text-emerald-200"><FaShieldAlt /></span>
+                            <span><strong className="block text-sm font-extrabold">Peer-to-peer</strong><span className="text-xs text-slate-300">Connect directly</span></span>
+                        </div>
+                        <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-black/20 p-3.5 backdrop-blur-xl transition duration-300 hover:bg-white/10">
+                            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-teal-400/20 text-teal-200"><FaLeaf /></span>
+                            <span><strong className="block text-sm font-extrabold">Reuse more</strong><span className="text-xs text-slate-300">Waste less together</span></span>
+                        </div>
+                    </div>
+                    <p className="mt-6 text-[11px] font-medium tracking-wide text-slate-300/80">A marketplace that feels a little closer to home.</p>
                 </div>
-            </div>
+                <div className="pointer-events-none absolute right-7 top-7 hidden items-center gap-2 rounded-full border border-white/15 bg-black/20 px-3 py-2 text-[10px] font-bold uppercase tracking-[0.18em] text-white/80 backdrop-blur-lg lg:flex">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-300" /> Campus life in motion
+                </div>
+            </section>
 
             {/* Premium Image Carousel */}
             <div className="mb-20 max-w-5xl mx-auto relative group rounded-3xl overflow-hidden shadow-2xl border border-slate-200 dark:border-slate-800">
