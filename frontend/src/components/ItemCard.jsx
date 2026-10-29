@@ -360,8 +360,9 @@ function ItemCard() {
                             Buy Now
                         </button>
                         <button
+                            disabled={item.seller?._id === currentUser?._id}
                             onClick={() => { setOfferPrice(String(item.price)); setShowOfferForm(value => !value) }}
-                            className="h-12 bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/40 dark:hover:bg-amber-950/70 text-amber-800 dark:text-amber-200 font-bold rounded-2xl flex items-center justify-center gap-2 transition"
+                            className="h-12 bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/40 dark:hover:bg-amber-950/70 text-amber-800 dark:text-amber-200 font-bold rounded-2xl flex items-center justify-center gap-2 transition disabled:cursor-not-allowed disabled:opacity-40"
                         >
                             <FaHandshake /> Make an offer
                         </button>
