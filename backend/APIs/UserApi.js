@@ -352,8 +352,8 @@ UserApi.patch('/profile', VerifyToken, (req, res, next) => {
         }
         if (req.body.phoneNo !== undefined) {
             const phone = String(req.body.phoneNo).trim();
-            if (!/^\\+?[0-9]{7,15}$/.test(phone)) return res.status(400).json({ message: 'Enter a valid phone number (7–15 digits, optional leading +)' });
-            const normalizedPhone = Number(phone.replace(/^\\+/, ''));
+            if (!/^\+?[0-9]{7,15}$/.test(phone)) return res.status(400).json({ message: 'Enter a valid phone number (7–15 digits, optional leading +)' });
+            const normalizedPhone = Number(phone.replace(/^\+/, ''));
             const duplicate = await UserModel.findOne({ phoneNo: normalizedPhone, _id: { $ne: req.user.id } }).select('_id');
             if (duplicate) return res.status(409).json({ message: 'That phone number is already linked to another account' });
             updates.phoneNo = normalizedPhone;
