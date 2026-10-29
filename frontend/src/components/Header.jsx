@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { NavLink, useNavigate } from 'react-router'
+import { useNavigate } from 'react-router'
 import { useAuth } from '../store/authStore'
 import { FaShoppingBag, FaBell, FaSignOutAlt, FaUserCircle, FaTimes } from 'react-icons/fa'
 import axios from 'axios'
@@ -104,9 +104,8 @@ function Header() {
               </div>
               <button type="button" onClick={() => navigate('/profile')} className="flex items-center gap-2 rounded-full p-1 transition hover:bg-slate-100" aria-label="Open profile" title="Profile">
                 {currentUser?.profileImageUrl ? <img src={currentUser.profileImageUrl} alt="" className="h-9 w-9 rounded-full border border-slate-200 object-cover" /> : <FaUserCircle className="h-8 w-8 text-slate-400" />}
-                <span className="hidden text-sm font-semibold text-slate-700 sm:inline">{currentUser?.firstname || 'Profile'}</span>
               </button>
-              <button type="button" onClick={onLogout} className="hidden items-center gap-2 rounded-full border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-700 sm:inline-flex"><FaSignOutAlt /> Logout</button>
+              <button type="button" onClick={onLogout} aria-label="Log out" title="Log out" className="rounded-full p-2.5 text-slate-500 transition hover:bg-rose-50 hover:text-rose-700"><FaSignOutAlt size={17} /></button>
             </div>
           )}
         </div>
