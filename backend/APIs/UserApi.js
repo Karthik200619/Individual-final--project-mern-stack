@@ -299,6 +299,70 @@ UserApi.post('/updateitem/:itemId', VerifyToken, async (req, res) => {
     }
 })
 
+// Read the authenticated user's editable profile fields only.
+UserApi.get('/profile', VerifyToken, async (req, res) => {
+    try {
+        const user = await UserModel.findById(req.user.id)
+            .select('firstname lastname email phoneNo gender profileImageUrl campus role createdAt')
+            .populate('campus', 'campusName city');
+        if (!user) return res.status(404).json({ message: 'User not found' });
+        return res.status(200).json({ message: 'Profile fetched successfully', payload: user });
+    } catch (err) {
+        console.error('Profile fetch failed:', err);
+        return res.status(500).json({ message: 'Failed to fetch profile' });
+    }
+});
+
+// Users may edit only their own name, phone number, and profile photo.
+// Email, campus, role, gender, password and account flags are intentionally immutable here.
+const profileUpload = multer({
+    limits: { fileSize: 5 * 1024 * 1024 },
+    fileFilter: (req, file, cb) => {
+        if (file.mimetype && file.mimetype.startsWith('image/')) return cb(null, true);
+        return cb(new Error('Profile photo must be an image'));
+    }
+});
+
+UserApi.patch('/profile', VerifyToken, (req, res, next) => {
+    profileUpload.single('profileImageUrl')(req, res, (err) => {
+        if (err) return res.status(400).json({ message: err.code === 'LIMIT_FILE_SIZE' ? 'Profile photo must be 5 MB or smaller' : (err.message || 'Invalid profile photo') });
+        next();
+    });
+}, async (req, res) => {
+    try {
+        const updates = {};
+        for (const field of ['firstname', 'lastname']) {
+            if (req.body[field] !== undefined) {
+                const value = String(req.body[field]).trim();
+                if (value.length < 2 || value.length > 30) return res.status(400).json({ message: field === 'firstname' ? 'First name must be 2–30 characters' : 'Last name must be 2–30 characters' });
+                updates[field] = value;
+            }
+        }
+        if (req.body.phoneNo !== undefined) {
+            const phone = String(req.body.phoneNo).trim();
+            if (!/^\\+?[0-9]{7,15}$/.test(phone)) return res.status(400).json({ message: 'Enter a valid phone number (7–15 digits, optional leading +)' });
+            const normalizedPhone = Number(phone.replace(/^\\+/, ''));
+            const duplicate = await UserModel.findOne({ phoneNo: normalizedPhone, _id: { $ne: req.user.id } }).select('_id');
+            if (duplicate) return res.status(409).json({ message: 'That phone number is already linked to another account' });
+            updates.phoneNo = normalizedPhone;
+        }
+        if (req.file) {
+            const result = await uploadResult({ byteArrayBuffer: req.file.buffer });
+            updates.profileImageUrl = result.secure_url;
+        }
+        if (!Object.keys(updates).length) return res.status(400).json({ message: 'Make at least one profile change before saving' });
+        const user = await UserModel.findByIdAndUpdate(req.user.id, { $set: updates }, { new: true, runValidators: true })
+            .select('firstname lastname email phoneNo gender profileImageUrl campus role createdAt')
+            .populate('campus', 'campusName city');
+        if (!user) return res.status(404).json({ message: 'User not found' });
+        return res.status(200).json({ message: 'Profile updated successfully', payload: user });
+    } catch (err) {
+        console.error('Profile update failed:', err);
+        if (err.code === 11000) return res.status(409).json({ message: 'That phone number is already linked to another account' });
+        return res.status(500).json({ message: 'Failed to update profile' });
+    }
+});
+
 // get all my items
 UserApi.get('/my-items', VerifyToken, async (req, res) => {
     try {
@@ -1022,15 +1086,19 @@ UserApi.get('/seller-items/:sellerId', async (req, res) => {
 UserApi.post('/cart/add', VerifyToken, async (req, res) => {
     try {
         const { itemId, quantity } = req.body;
+        if (!mongoose.Types.ObjectId.isValid(String(itemId || ''))) return res.status(400).json({ message: 'Valid itemId is required' });
+        const qtyToAdd = Number(quantity ?? 1);
+        if (!Number.isInteger(qtyToAdd) || qtyToAdd < 1) return res.status(400).json({ message: 'Quantity must be a positive whole number' });
         const user = await UserModel.findById(req.user.id);
-        const item = await ItemModel.findById(itemId);
-        if (!item) {
-            return res.status(404).json({ message: 'Item not found' });
-        }
+        if (!user) return res.status(404).json({ message: 'User not found' });
+        const item = await ItemModel.findOne({ _id: itemId, isActive: true });
+        if (!item) return res.status(404).json({ message: 'Active item not found' });
+        if (item.seller.toString() === req.user.id) return res.status(400).json({ message: 'You cannot add your own listing to the cart' });
         const existingIndex = user.cartItems.findIndex(ci => ci.item.toString() === itemId);
-        const qtyToAdd = Number(quantity || 1);
+        const existingQty = existingIndex > -1 ? user.cartItems[existingIndex].quantity : 0;
+        if (existingQty + qtyToAdd > item.quantity) return res.status(400).json({ message: 'Requested quantity exceeds available stock' });
         if (existingIndex > -1) {
-            user.cartItems[existingIndex].quantity += qtyToAdd;
+            user.cartItems[existingIndex].quantity = existingQty + qtyToAdd;
         } else {
             user.cartItems.push({ item: itemId, quantity: qtyToAdd });
         }
@@ -1046,13 +1114,21 @@ UserApi.post('/cart/add', VerifyToken, async (req, res) => {
 UserApi.post('/cart/update', VerifyToken, async (req, res) => {
     try {
         const { itemId, quantity } = req.body;
+        if (!mongoose.Types.ObjectId.isValid(String(itemId || ''))) return res.status(400).json({ message: 'Valid itemId is required' });
+        const requestedQuantity = Number(quantity);
+        if (!Number.isInteger(requestedQuantity)) return res.status(400).json({ message: 'Quantity must be a whole number' });
         const user = await UserModel.findById(req.user.id);
+        if (!user) return res.status(404).json({ message: 'User not found' });
         const itemIndex = user.cartItems.findIndex(ci => ci.item.toString() === itemId);
         if (itemIndex > -1) {
-            if (Number(quantity) <= 0) {
+            if (requestedQuantity <= 0) {
                 user.cartItems.splice(itemIndex, 1);
             } else {
-                user.cartItems[itemIndex].quantity = Number(quantity);
+                const item = await ItemModel.findOne({ _id: itemId, isActive: true });
+                if (!item) return res.status(404).json({ message: 'Active item not found' });
+                if (item.seller.toString() === req.user.id) return res.status(400).json({ message: 'You cannot add your own listing to the cart' });
+                if (requestedQuantity > item.quantity) return res.status(400).json({ message: 'Requested quantity exceeds available stock' });
+                user.cartItems[itemIndex].quantity = requestedQuantity;
             }
             await user.save();
             return res.status(200).json({ message: 'Cart updated', payload: user.cartItems });
@@ -1550,12 +1626,19 @@ UserApi.patch(
     async (req, res) => {
         try {
             const { status } = req.body
+            const allowedStatuses = ['pending', 'accepted', 'preparing', 'in_transit', 'delivered', 'cancelled']
+            if (!allowedStatuses.includes(status)) {
+                return res.status(400).json({ message: 'Invalid delivery status' })
+            }
             const delivery = await DeliveryModel.findById(req.params.deliveryId)
+                .populate({ path: 'order', select: 'buyer seller' })
 
             if (!delivery) {
-                return res.status(404).json({
-                    message: 'Delivery not found'
-                })
+                return res.status(404).json({ message: 'Delivery not found' })
+            }
+            const order = delivery.order
+            if (!order || order.seller?.toString() !== req.user.id) {
+                return res.status(403).json({ message: 'Only the seller for this order can update delivery status' })
             }
 
             delivery.status = status
