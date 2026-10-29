@@ -18,6 +18,8 @@ function BuyItem() {
 
     const [item, setItem] = useState(null)
     const [quantity, setQuantity] = useState(1)
+    const [offerId, setOfferId] = useState('')
+    const [negotiatedPrice, setNegotiatedPrice] = useState(null)
     const [deliveryType, setDeliveryType] = useState('pickup')
     const [paymentMethod, setPaymentMethod] = useState('cash')
     const [demoCardName, setDemoCardName] = useState('')
@@ -41,9 +43,9 @@ function BuyItem() {
         // Read quantity from query parameter if it exists
         const queryParams = new URLSearchParams(window.location.search)
         const qtyParam = queryParams.get('quantity')
-        if (qtyParam) {
-            setQuantity(Number(qtyParam))
-        }
+        const selectedOfferId = queryParams.get('offerId') || ''
+        setOfferId(selectedOfferId)
+        if (qtyParam) setQuantity(Number(qtyParam))
 
         const getItem = async () => {
             try {
@@ -54,6 +56,28 @@ function BuyItem() {
                     }
                 )
                 setItem(res.data.payload)
+
+                if (selectedOfferId) {
+                    try {
+                        const offersRes = await axios.get('https://individual-final-project-mern-stack.onrender.com/user-api/offers/mine', { withCredentials: true })
+                        const acceptedOffer = (offersRes.data.payload || []).find(offer =>
+                            offer._id === selectedOfferId &&
+                            offer.status === 'accepted' &&
+                            (offer.item?._id || offer.item) === itemId
+                        )
+                        if (!acceptedOffer) {
+                            showToast('That offer is no longer accepted. Check your offers for the latest status.', 'error')
+                            navigate('/offers')
+                            return
+                        }
+                        setNegotiatedPrice(Number(acceptedOffer.offeredPrice))
+                        setQuantity(Number(acceptedOffer.quantity))
+                    } catch (offerError) {
+                        showToast(offerError.response?.data?.message || 'Could not verify accepted offer.', 'error')
+                        navigate('/offers')
+                        return
+                    }
+                }
 
                 // filter locations based on category
                 const preferredLocations = res.data.payload.seller.campus.preferredDeliveryLocations.filter(
@@ -121,6 +145,7 @@ function BuyItem() {
                 `https://individual-final-project-mern-stack.onrender.com/user-api/buyitem/${itemId}`,
                 {
                     quantity,
+                    offerId: offerId || undefined,
                     deliveryType,
                     meetupLocation,
                     locationCoordinates: selectedCoordinates,
@@ -168,7 +193,8 @@ function BuyItem() {
         )
     }
 
-    const subtotal = item.price * quantity
+    const unitPrice = negotiatedPrice ?? item.price
+    const subtotal = unitPrice * quantity
     const discountAmount = Math.round((subtotal * discountPercentage) / 100)
     const finalTotal = subtotal - discountAmount
 
@@ -202,12 +228,13 @@ function BuyItem() {
                                     {item.title}
                                 </h2>
                                 <span className="text-indigo-650 dark:text-indigo-400 font-extrabold text-sm whitespace-nowrap">
-                                    ₹{item.price}
+                                    ₹{unitPrice}
                                 </span>
                             </div>
                             <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mt-1">
                                 {item.description}
                             </p>
+                            {negotiatedPrice !== null && <p className="mt-2 rounded-lg bg-emerald-50 px-2.5 py-1.5 text-[11px] font-bold text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300">Agreed offer price · checkout must match the accepted offer</p>}
                         </div>
                         <p className="text-[10px] font-semibold text-slate-400 mt-2">
                             Stock Available: {item.quantity}
