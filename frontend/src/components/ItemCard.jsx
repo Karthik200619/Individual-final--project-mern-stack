@@ -12,9 +12,11 @@ import {
     FaTrash,
     FaEdit,
     FaComments,
-    FaPlayCircle
+    FaPlayCircle,
+    FaHandshake
 } from 'react-icons/fa'
 import { useAuth } from '../store/authStore'
+import { showToast } from '../utils/toast'
 
 function ItemCard() {
     const { itemId } = useParams()
@@ -23,6 +25,11 @@ function ItemCard() {
 
     const [item, setItem] = useState(null)
     const [activeSlide, setActiveSlide] = useState(0)
+    const [showOfferForm, setShowOfferForm] = useState(false)
+    const [offerPrice, setOfferPrice] = useState('')
+    const [offerQuantity, setOfferQuantity] = useState(1)
+    const [offerMessage, setOfferMessage] = useState('')
+    const [submittingOffer, setSubmittingOffer] = useState(false)
 
     // Comments State
     const [comments, setComments] = useState([])
@@ -62,6 +69,35 @@ function ItemCard() {
         } catch (err) {
             console.log(err)
             alert('Failed to add to cart')
+        }
+    }
+
+    const submitOffer = async (e) => {
+        e.preventDefault()
+        const price = Number(offerPrice)
+        if (!Number.isFinite(price) || price <= 0) {
+            showToast('Enter a valid offer price.', 'error')
+            return
+        }
+        if (!Number.isInteger(Number(offerQuantity)) || Number(offerQuantity) < 1 || Number(offerQuantity) > item.quantity) {
+            showToast('Choose a valid quantity within available stock.', 'error')
+            return
+        }
+        try {
+            setSubmittingOffer(true)
+            await axios.post(`https://individual-final-project-mern-stack.onrender.com/user-api/offers/${item._id}`, {
+                offeredPrice: price,
+                quantity: Number(offerQuantity),
+                message: offerMessage.trim()
+            }, { withCredentials: true })
+            showToast('Offer sent! You can track it in Offers & bargaining.', 'success')
+            setShowOfferForm(false)
+            setOfferMessage('')
+            navigate('/offers')
+        } catch (err) {
+            showToast(err.response?.data?.message || 'Failed to send offer.', 'error')
+        } finally {
+            setSubmittingOffer(false)
         }
     }
 
@@ -304,7 +340,7 @@ function ItemCard() {
                     )}
 
                     {/* Action Buttons */}
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                         <button
                             onClick={() => navigate(`/messages?userId=${item.seller?._id}&itemId=${item._id}`)}
                             className="h-12 bg-white hover:bg-slate-50 dark:bg-slate-900 dark:hover:bg-slate-850 border border-slate-200 dark:border-slate-800 text-slate-850 dark:text-slate-100 font-bold rounded-2xl flex items-center justify-center gap-2 transition"
@@ -323,7 +359,40 @@ function ItemCard() {
                         >
                             Buy Now
                         </button>
+                        <button
+                            onClick={() => { setOfferPrice(String(item.price)); setShowOfferForm(value => !value) }}
+                            className="h-12 bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/40 dark:hover:bg-amber-950/70 text-amber-800 dark:text-amber-200 font-bold rounded-2xl flex items-center justify-center gap-2 transition"
+                        >
+                            <FaHandshake /> Make an offer
+                        </button>
                     </div>
+
+                    {showOfferForm && item.seller?._id !== currentUser?._id && (
+                        <form onSubmit={submitOffer} className="rounded-3xl border border-amber-200 bg-amber-50/70 p-5 shadow-sm dark:border-amber-900 dark:bg-amber-950/20 space-y-4">
+                            <div>
+                                <h3 className="font-extrabold text-slate-900 dark:text-white">Make a price offer</h3>
+                                <p className="mt-1 text-xs text-slate-600 dark:text-slate-300">Asking price: ₹{item.price}. You can send offers on multiple listings and negotiate with the seller.</p>
+                            </div>
+                            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                                <div>
+                                    <label className="mb-1 block text-xs font-bold text-slate-600 dark:text-slate-300">Your offer (₹)</label>
+                                    <input type="number" min="1" step="1" required value={offerPrice} onChange={e => setOfferPrice(e.target.value)} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm text-slate-900 outline-none focus:border-indigo-500 dark:border-slate-700 dark:bg-slate-950 dark:text-white" />
+                                </div>
+                                <div>
+                                    <label className="mb-1 block text-xs font-bold text-slate-600 dark:text-slate-300">Quantity</label>
+                                    <input type="number" min="1" max={item.quantity} step="1" required value={offerQuantity} onChange={e => setOfferQuantity(e.target.value)} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm text-slate-900 outline-none focus:border-indigo-500 dark:border-slate-700 dark:bg-slate-950 dark:text-white" />
+                                </div>
+                            </div>
+                            <div>
+                                <label className="mb-1 block text-xs font-bold text-slate-600 dark:text-slate-300">Message (optional)</label>
+                                <textarea rows="2" maxLength="500" value={offerMessage} onChange={e => setOfferMessage(e.target.value)} placeholder="e.g. I can pick it up today." className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm text-slate-900 outline-none focus:border-indigo-500 dark:border-slate-700 dark:bg-slate-950 dark:text-white" />
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                                <button type="submit" disabled={submittingOffer} className="rounded-xl bg-indigo-600 px-5 py-3 text-xs font-bold text-white disabled:opacity-50">{submittingOffer ? 'Sending…' : 'Send offer'}</button>
+                                <button type="button" onClick={() => setShowOfferForm(false)} className="rounded-xl border border-slate-200 px-5 py-3 text-xs font-bold text-slate-700 dark:border-slate-700 dark:text-slate-200">Cancel</button>
+                            </div>
+                        </form>
+                    )}
                 </div>
             </div>
 
