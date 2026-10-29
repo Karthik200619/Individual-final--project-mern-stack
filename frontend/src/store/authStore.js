@@ -8,6 +8,8 @@ export const useAuth = create((set) => ({
     isAuthenticated: false,
     error: null,
 
+    setCurrentUser: (currentUser) => set({ currentUser, isAuthenticated: Boolean(currentUser) }),
+
     registeruser: async (data) => {
 
         try {
