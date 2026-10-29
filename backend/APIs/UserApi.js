@@ -70,6 +70,10 @@ UserApi.post('/register', upload.single("profileImageUrl"), async (req, res) => 
             })
 
         }
+        // A profile image is required during registration; fail clearly rather than throwing a 500.
+        if (!req.file || !req.file.buffer) {
+            return res.status(400).json({ message: 'Please upload a profile photo' });
+        }
         // upload image
         const byteArrayBuffer = req.file.buffer
 
@@ -277,8 +281,16 @@ UserApi.post('/updateitem/:itemId', VerifyToken, async (req, res) => {
 
         item.title = updatedFields.title ?? item.title;
         item.description = updatedFields.description ?? item.description;
-        item.price = Number(updatedFields.price) ?? item.price;
-        item.quantity = Number(updatedFields.quantity) ?? item.quantity;
+        if (updatedFields.price !== undefined) {
+            const price = Number(updatedFields.price);
+            if (!Number.isFinite(price) || price < 0) return res.status(400).json({ message: 'Price must be a non-negative number' });
+            item.price = price;
+        }
+        if (updatedFields.quantity !== undefined) {
+            const quantity = Number(updatedFields.quantity);
+            if (!Number.isInteger(quantity) || quantity < 0) return res.status(400).json({ message: 'Quantity must be a non-negative whole number' });
+            item.quantity = quantity;
+        }
         item.category = updatedFields.category ?? item.category;
         if (updatedFields.rating !== undefined) {
             item.rating = Number(updatedFields.rating);
@@ -1626,7 +1638,7 @@ UserApi.patch(
     async (req, res) => {
         try {
             const { status } = req.body
-            const allowedStatuses = ['pending', 'accepted', 'preparing', 'in_transit', 'delivered', 'cancelled']
+            const allowedStatuses = ['pending', 'accepted', 'meetup_confirmed', 'out_for_delivery', 'delivered', 'completed', 'cancelled']
             if (!allowedStatuses.includes(status)) {
                 return res.status(400).json({ message: 'Invalid delivery status' })
             }
