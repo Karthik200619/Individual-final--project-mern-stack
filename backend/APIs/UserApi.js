@@ -738,11 +738,6 @@ UserApi.post("/buyitem/:itemId", VerifyToken, async (req, res) => {
         })
 
         // create delivery
-        if (acceptedOffer) {
-            acceptedOffer.status = 'completed';
-            await acceptedOffer.save();
-        }
-
         const delivery = await DeliveryModel.create({
 
             order: order._id,
@@ -765,6 +760,11 @@ UserApi.post("/buyitem/:itemId", VerifyToken, async (req, res) => {
         order.delivery = delivery._id
 
         await order.save()
+
+        if (acceptedOffer) {
+            acceptedOffer.status = 'completed';
+            await acceptedOffer.save();
+        }
 
         // Send email notifications and in-app message safely in background
         try {
