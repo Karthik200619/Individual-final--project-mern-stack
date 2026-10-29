@@ -11,6 +11,15 @@ import { NotificationModel } from '../models/NotificationModel.js';
 import sendemail from '../config/nodemailer.js';
 export const AdminApi = exp.Router();
 
+// Every route under /admin-api requires a valid session and an ADMIN role.
+// Individual handlers may repeat VerifyToken for clarity; authorization is enforced centrally too.
+AdminApi.use(VerifyToken, (req, res, next) => {
+    if (req.user?.role !== 'ADMIN') {
+        return res.status(403).json({ message: 'Forbidden: Admin access only' });
+    }
+    next();
+});
+
 
 // Get all pending items
 
