@@ -1,325 +1,118 @@
 import React, { useState, useEffect } from 'react'
-import { NavLink } from 'react-router'
+import { NavLink, useNavigate } from 'react-router'
 import { useAuth } from '../store/authStore'
-import { useNavigate } from 'react-router'
-import { FaSun, FaMoon, FaShoppingBag, FaBars, FaTimes, FaBell } from 'react-icons/fa'
+import { FaShoppingBag, FaBell, FaSignOutAlt, FaUserCircle, FaTimes } from 'react-icons/fa'
 import axios from 'axios'
 
 function Header() {
-    const { isAuthenticated, currentUser, logout } = useAuth();
-    const navigate = useNavigate()
+  const { isAuthenticated, currentUser, logout } = useAuth()
+  const navigate = useNavigate()
+  const [activeCoupons, setActiveCoupons] = useState([])
+  const [couponBarDismissed, setCouponBarDismissed] = useState(false)
+  const [notificationOpen, setNotificationOpen] = useState(false)
+  const [notifications, setNotifications] = useState([])
 
-    // Theme state
-    const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light')
+  useEffect(() => {
+    document.documentElement.classList.remove('dark')
+    localStorage.setItem('theme', 'light')
+  }, [])
 
-    // Coupons state for notification bar
-    const [activeCoupons, setActiveCoupons] = useState([])
-    const [couponBarDismissed, setCouponBarDismissed] = useState(false)
-
-    const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-    const [notificationOpen, setNotificationOpen] = useState(false)
-    const [notifications, setNotifications] = useState([])
-
-    useEffect(() => {
-        if (!isAuthenticated) {
-            setNotifications([])
-            return
-        }
-
-        const fetchNotifications = async () => {
-            try {
-                const res = await axios.get('https://individual-final-project-mern-stack.onrender.com/user-api/notifications', { withCredentials: true })
-                setNotifications(res.data.payload || [])
-            } catch (err) {
-                console.error('Error fetching notifications for header:', err)
-            }
-        }
-        fetchNotifications()
-    }, [isAuthenticated])
-
-    const unreadCount = notifications.filter(n => !n.read).length
-
-    const markNotificationRead = async (id) => {
-        try {
-            await axios.patch(`https://individual-final-project-mern-stack.onrender.com/user-api/notifications/${id}/read`, {}, { withCredentials: true })
-            setNotifications(prev => prev.map(note => note._id === id ? { ...note, read: true } : note))
-        } catch (err) {
-            console.error('Failed to mark notification as read:', err)
-        }
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setNotifications([])
+      setActiveCoupons([])
+      return
     }
-
-    useEffect(() => {
-        if (isAuthenticated) {
-            const fetchCoupons = async () => {
-                try {
-                    const res = await axios.get('https://individual-final-project-mern-stack.onrender.com/user-api/active-coupons', { withCredentials: true })
-                    setActiveCoupons(res.data.payload || [])
-                } catch (err) {
-                    console.error("Error fetching active coupons for header:", err)
-                }
-            }
-            fetchCoupons()
-        } else {
-            setActiveCoupons([])
-        }
-    }, [isAuthenticated])
-
-    useEffect(() => {
-        document.documentElement.classList.toggle('dark', theme === 'dark')
-        localStorage.setItem('theme', theme)
-    }, [theme])
-
-    const toggleTheme = () => {
-        setTheme(prev => prev === 'light' ? 'dark' : 'light')
+    const fetchNotifications = async () => {
+      try {
+        const res = await axios.get('https://individual-final-project-mern-stack.onrender.com/user-api/notifications', { withCredentials: true })
+        setNotifications(res.data.payload || [])
+      } catch (err) {
+        console.error('Error fetching notifications for header:', err)
+      }
     }
-
-    const onlogout = async () => {
-        await logout();
-        navigate('/');
+    const fetchCoupons = async () => {
+      try {
+        const res = await axios.get('https://individual-final-project-mern-stack.onrender.com/user-api/active-coupons', { withCredentials: true })
+        setActiveCoupons(res.data.payload || [])
+      } catch (err) {
+        console.error('Error fetching active coupons for header:', err)
+      }
     }
+    fetchNotifications()
+    fetchCoupons()
+  }, [isAuthenticated])
 
-    const headerarr = !isAuthenticated
-        ? [
-            { path: '/', label: 'Home' },
-            { path: '/login', label: 'Login' },
-            { path: '/register', label: 'Register' }
-        ]
-        : currentUser?.role === "ADMIN"
-            ? [
-                {
-                    path: '/admin-dashboard',
-                    label: 'Dashboard'
-                }
-            ]
-            : [
-                {
-                    path: '/userhome',
-                    label: 'Dashboard'
-                },
-                {
-                    path: '/allproducts',
-                    label: 'Browse'
-                },
-                {
-                    path: '/additem',
-                    label: 'Sell Item'
-                },
-                {
-                    path: '/myitems',
-                    label: 'My Listings'
-                },
-                {
-                    path: '/offers',
-                    label: 'Offers & Bargaining'
-                },
-                {
-                    path: '/profile',
-                    label: 'Edit Profile'
-                },
-                {
-                    path: '/messages',
-                    label: 'Messages'
-                },
-                {
-                    path: '/cart',
-                    label: 'Cart'
-                }
-            ];
+  const unreadCount = notifications.filter(note => !note.read).length
 
-    return (
-        <>
-            {activeCoupons.length > 0 && !couponBarDismissed && (
-                <div className="bg-linear-to-r from-amber-500 via-orange-500 to-indigo-650 text-white text-xs font-bold px-6 py-3 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 relative shadow-sm border-b border-orange-400/20 z-50">
-                    <div className="flex-1 flex flex-col sm:flex-row justify-center items-center gap-2 overflow-hidden text-center">
-                        <span className="animate-bounce">🎉</span>
-                        <span className="tracking-wide truncate">
-                            Special Offer: Use code <span className="bg-white/20 dark:bg-black/20 px-2 py-0.5 rounded font-black border border-white/35 uppercase select-all">{activeCoupons[0].code}</span> for <span className="underline">{activeCoupons[0].discountPercentage}% OFF</span>
-                            {activeCoupons[0].category !== 'ALL' && ` on ${activeCoupons[0].category}`}
-                            {activeCoupons[0].minPrice > 0 && ` (orders above ₹${activeCoupons[0].minPrice})`}!
-                        </span>
+  const markNotificationRead = async (id) => {
+    try {
+      await axios.patch(`https://individual-final-project-mern-stack.onrender.com/user-api/notifications/${id}/read`, {}, { withCredentials: true })
+      setNotifications(prev => prev.map(note => note._id === id ? { ...note, read: true } : note))
+    } catch (err) {
+      console.error('Failed to mark notification as read:', err)
+    }
+  }
+
+  const onLogout = async () => {
+    await logout()
+    navigate('/')
+  }
+
+  return (
+    <>
+      {isAuthenticated && activeCoupons.length > 0 && !couponBarDismissed && (
+        <div className="flex items-center justify-center gap-3 border-b border-amber-200 bg-amber-50 px-4 py-2 text-center text-xs font-semibold text-amber-950">
+          <span>🎉 Use code <strong>{activeCoupons[0].code}</strong> for {activeCoupons[0].discountPercentage}% off{activeCoupons[0].category !== 'ALL' ? ` on ${activeCoupons[0].category}` : ''}{activeCoupons[0].minPrice > 0 ? ` orders above ₹${activeCoupons[0].minPrice}` : ''}.</span>
+          <button onClick={() => setCouponBarDismissed(true)} aria-label="Dismiss coupon offer" className="rounded p-1 text-amber-800 hover:bg-amber-100"><FaTimes /></button>
+        </div>
+      )}
+      <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 px-4 py-3 shadow-sm backdrop-blur sm:px-6">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4">
+          <button type="button" onClick={() => navigate('/')} className="flex items-center gap-2.5 rounded-lg" aria-label="CampusKart home">
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-sm"><FaShoppingBag /></span>
+            <span className="text-xl font-extrabold tracking-tight text-slate-900">CampusKart</span>
+          </button>
+
+          {isAuthenticated && (
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <button type="button" onClick={() => setNotificationOpen(prev => !prev)} className="relative rounded-full p-2.5 text-slate-600 transition hover:bg-slate-100 hover:text-indigo-700" aria-label="View notifications">
+                  <FaBell size={17} />
+                  {unreadCount > 0 && <span className="absolute right-0.5 top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-500 px-1 text-[9px] font-bold text-white">{unreadCount}</span>}
+                </button>
+                {notificationOpen && (
+                  <div className="absolute right-0 mt-2 max-h-96 w-80 max-w-[calc(100vw-2rem)] overflow-y-auto rounded-2xl border border-slate-200 bg-white p-3 shadow-xl">
+                    <div className="mb-3 flex items-center justify-between">
+                      <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500">Notifications</h2>
+                      <button type="button" onClick={() => setNotificationOpen(false)} className="rounded p-1 text-slate-500 hover:bg-slate-100" aria-label="Close notifications"><FaTimes /></button>
                     </div>
-                    <button 
-                        onClick={() => setCouponBarDismissed(true)} 
-                        className="text-white hover:text-orange-105 transition text-[10px] font-black"
-                        aria-label="Dismiss coupon bar"
-                    >
-                        ✕
-                    </button>
-                </div>
-            )}
-            <header className="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800/80 shadow-sm px-6 py-3 transition-all duration-300">
-            <div className="flex items-center justify-between max-w-7xl mx-auto gap-3">
-
-                <div className="flex items-center gap-3">
-                    <button
-                        type="button"
-                        onClick={() => setMobileMenuOpen(prev => !prev)}
-                        className="sm:hidden p-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300"
-                        aria-label="Toggle navigation menu"
-                    >
-                        {mobileMenuOpen ? <FaTimes size={16} /> : <FaBars size={16} />}
-                    </button>
-
-                    <div
-                        onClick={() => navigate('/')}
-                        className="flex items-center gap-2 cursor-pointer"
-                    >
-                        <span className="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center text-sm shadow-sm">
-                            <FaShoppingBag />
-                        </span>
-                        <span className="hidden sm:inline bg-linear-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent text-xl font-extrabold">
-                            CampusBuy
-                        </span>
-                    </div>
-                </div>
-
-                <div className="hidden sm:flex items-center gap-2 flex-wrap">
-                    {headerarr.map((ele) => (
-                        <NavLink
-                            key={ele.path}
-                            to={ele.path}
-                            className={({ isActive }) =>
-                                `px-4 py-1.5 rounded-full text-xs font-semibold tracking-wide transition-all duration-300
-                                ${isActive
-                                    ? "bg-indigo-600 text-white shadow-sm shadow-indigo-200 dark:shadow-none"
-                                    : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-50"
-                                }`
-                            }
-                        >
-                            {ele.label}
-                        </NavLink>
-                    ))}
-                </div>
-
-                <div className="flex items-center gap-2">
-                    <div className="relative">
-                        <button
-                            type="button"
-                            onClick={() => {
-                                setNotificationOpen(prev => !prev)
-                                setMobileMenuOpen(false)
-                            }}
-                            className="p-2 rounded-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
-                            aria-label="View notifications"
-                        >
-                            <FaBell size={16} />
-                            {unreadCount > 0 && (
-                                <span className="absolute -top-1 -right-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-500 text-[9px] text-white font-black px-1">
-                                    {unreadCount}
-                                </span>
-                            )}
-                        </button>
-
-                        {notificationOpen && (
-                            <div className="absolute right-0 mt-2 w-80 max-h-96 overflow-y-auto rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-2xl p-3 z-50">
-                                <div className="flex items-center justify-between mb-3">
-                                    <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Notifications</h2>
-                                    <button
-                                        type="button"
-                                        onClick={() => setNotificationOpen(false)}
-                                        className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
-                                        aria-label="Close notifications"
-                                    >
-                                        <FaTimes size={14} />
-                                    </button>
-                                </div>
-                                {notifications.length === 0 ? (
-                                    <p className="text-[11px] text-slate-500 dark:text-slate-400">No notifications yet.</p>
-                                ) : (
-                                    <ul className="space-y-2">
-                                        {notifications.slice(0, 6).map(note => (
-                                            <li key={note._id} className={`rounded-2xl p-3 border ${note.read ? 'border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-900' : 'border-indigo-200 bg-indigo-50/80 dark:border-indigo-800 dark:bg-indigo-950/40'}`}>
-                                                <div className="flex items-start justify-between gap-2">
-                                                    <div>
-                                                        <p className="text-[11px] font-bold text-slate-900 dark:text-slate-100">{note.title}</p>
-                                                        <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 whitespace-pre-wrap">{note.message}</p>
-                                                    </div>
-                                                    {!note.read && (
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => markNotificationRead(note._id)}
-                                                            className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400"
-                                                        >
-                                                            Mark read
-                                                        </button>
-                                                    )}
-                                                </div>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                )}
+                    {notifications.length === 0 ? <p className="text-sm text-slate-500">No notifications yet.</p> : (
+                      <ul className="space-y-2">
+                        {notifications.slice(0, 6).map(note => (
+                          <li key={note._id} className={`rounded-xl border p-3 ${note.read ? 'border-slate-200 bg-slate-50' : 'border-indigo-200 bg-indigo-50'}`}>
+                            <div className="flex items-start justify-between gap-2">
+                              <div><p className="text-sm font-bold text-slate-900">{note.title}</p><p className="mt-1 whitespace-pre-wrap text-xs text-slate-600">{note.message}</p></div>
+                              {!note.read && <button type="button" onClick={() => markNotificationRead(note._id)} className="shrink-0 text-xs font-bold text-indigo-700">Mark read</button>}
                             </div>
-                        )}
-                    </div>
-
-                    <button
-                        onClick={toggleTheme}
-                        className="p-2 rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 hover:text-indigo-600 transition hover:scale-110"
-                        aria-label="Toggle Theme"
-                    >
-                        {theme === 'light' ? <FaMoon size={14} /> : <FaSun size={14} className="text-yellow-400" />}
-                    </button>
-
-                    {isAuthenticated && (
-                        <>
-                            {currentUser?.profileImageUrl && (
-                                <img
-                                    src={currentUser.profileImageUrl}
-                                    alt="profile"
-                                    className="hidden sm:block w-8 h-8 rounded-full border border-indigo-400 object-cover shadow-sm"
-                                />
-                            )}
-                            <span className="hidden md:block text-slate-900 dark:text-slate-100 font-medium text-xs">
-                                {currentUser?.firstname}
-                            </span>
-                            <button
-                                onClick={onlogout}
-                                className="hidden sm:inline-flex bg-red-500/10 text-red-500 border border-red-500/20 px-3 py-1.5 text-xs font-semibold rounded-full hover:bg-red-500 hover:text-white transition duration-300"
-                            >
-                                Logout
-                            </button>
-                        </>
-                    )}
-                </div>
-            </div>
-
-            {mobileMenuOpen && (
-                <div className="sm:hidden mt-3 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-4 shadow-lg">
-                    <div className="space-y-3">
-                        {headerarr.map((ele) => (
-                            <NavLink
-                                key={ele.path}
-                                to={ele.path}
-                                onClick={() => setMobileMenuOpen(false)}
-                                className={({ isActive }) =>
-                                    `block w-full rounded-2xl px-4 py-3 text-sm font-semibold transition ${isActive ? 'bg-indigo-600 text-white' : 'text-slate-700 dark:text-slate-200 bg-slate-50 dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800'}`
-                                }
-                            >
-                                {ele.label}
-                            </NavLink>
+                          </li>
                         ))}
-                        <button
-                            onClick={() => { toggleTheme(); setMobileMenuOpen(false); }}
-                            className="w-full text-left rounded-2xl px-4 py-3 text-sm font-semibold border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-200"
-                        >
-                            Toggle Theme
-                        </button>
-                        {isAuthenticated && (
-                            <>
-                                <button
-                                    onClick={() => { onlogout(); setMobileMenuOpen(false); }}
-                                    className="w-full rounded-2xl px-4 py-3 text-sm font-semibold text-red-600 bg-red-50 dark:bg-red-950/30 dark:text-red-300"
-                                >
-                                    Logout
-                                </button>
-                            </>
-                        )}
-                    </div>
-                </div>
-            )}
-        </header>
-        </>
-    )
+                      </ul>
+                    )}
+                  </div>
+                )}
+              </div>
+              <button type="button" onClick={() => navigate('/profile')} className="flex items-center gap-2 rounded-full p-1 transition hover:bg-slate-100" aria-label="Open profile" title="Profile">
+                {currentUser?.profileImageUrl ? <img src={currentUser.profileImageUrl} alt="" className="h-9 w-9 rounded-full border border-slate-200 object-cover" /> : <FaUserCircle className="h-8 w-8 text-slate-400" />}
+                <span className="hidden text-sm font-semibold text-slate-700 sm:inline">{currentUser?.firstname || 'Profile'}</span>
+              </button>
+              <button type="button" onClick={onLogout} className="hidden items-center gap-2 rounded-full border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-700 sm:inline-flex"><FaSignOutAlt /> Logout</button>
+            </div>
+          )}
+        </div>
+      </header>
+    </>
+  )
 }
 
 export default Header
