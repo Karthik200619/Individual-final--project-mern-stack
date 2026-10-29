@@ -26,6 +26,7 @@ import Messages from './components/Messages'
 import AllProducts from './components/AllProducts'
 import HelpCenter from './components/HelpCenter'
 import Offers from './components/Offers'
+import Profile from './components/Profile'
 
 const router = createBrowserRouter([{
     path: "/",
@@ -109,6 +110,13 @@ const router = createBrowserRouter([{
         element:
         <ProtectedRoute allowedRoles={["USER"]} >
           <Offers/>
+        </ProtectedRoute>
+      },
+      {
+        path: "/profile",
+        element:
+        <ProtectedRoute allowedRoles={["USER"]} >
+          <Profile />
         </ProtectedRoute>
       },
       {
