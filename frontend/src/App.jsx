@@ -25,6 +25,7 @@ import Cart from './components/Cart'
 import Messages from './components/Messages'
 import AllProducts from './components/AllProducts'
 import HelpCenter from './components/HelpCenter'
+import Offers from './components/Offers'
 
 const router = createBrowserRouter([{
     path: "/",
@@ -101,6 +102,13 @@ const router = createBrowserRouter([{
         element: 
         <ProtectedRoute allowedRoles={["USER"]} >
           <BuyItem/>
+        </ProtectedRoute>
+      },
+      {
+        path: "/offers",
+        element:
+        <ProtectedRoute allowedRoles={["USER"]} >
+          <Offers/>
         </ProtectedRoute>
       },
       {
