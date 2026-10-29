@@ -32,7 +32,9 @@ CommonApi.get('/logout', async (req, res) => {
 // refresh
 CommonApi.get('/refresh', VerifyToken, async (req, res) => {
 
-    const user = await UserModel.findById(req.user.id);
+    const user = await UserModel.findById(req.user.id)
+        .select('-password');
+    if (!user) return res.status(401).json({ message: 'Account not found' });
 
     res.status(200).json({
         message: 'refresh successful',
