@@ -311,6 +311,9 @@ UserApi.post('/updateitem/:itemId', VerifyToken, async (req, res) => {
     }
 })
 
+// Profile API contract: GET /user-api/profile reads the authenticated user's profile;
+// PATCH /user-api/profile updates only the authenticated user's editable fields.
+// Keep these routes on UserApi because server.js mounts this router at /user-api.
 // Read the authenticated user's editable profile fields only.
 UserApi.get('/profile', VerifyToken, async (req, res) => {
     try {
