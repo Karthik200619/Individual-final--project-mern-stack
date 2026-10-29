@@ -113,6 +113,10 @@ function Header() {
                     label: 'Offers & Bargaining'
                 },
                 {
+                    path: '/profile',
+                    label: 'Edit Profile'
+                },
+                {
                     path: '/messages',
                     label: 'Messages'
                 },
