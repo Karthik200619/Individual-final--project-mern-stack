@@ -1395,9 +1395,8 @@ UserApi.get(
 
                 .populate({
                     path: 'seller',
-                    populate: {
-                        path: 'campus'
-                    }
+                    select: 'firstname lastname profileImageUrl email phoneNo campus',
+                    populate: { path: 'campus', select: 'campusName city' }
                 })
 
                 .sort({
@@ -1474,9 +1473,8 @@ UserApi.get('/campus/:campusId', async (req, res) => {
         const items = await ItemModel.find({ isActive: true })
             .populate({
                 path: 'seller',
-                populate: {
-                    path: 'campus'
-                }
+                select: 'firstname lastname profileImageUrl campus',
+                populate: { path: 'campus', select: 'campusName city' }
             })
 
         const filtered = items.filter(
@@ -1587,12 +1585,9 @@ UserApi.get(
                 .populate({
                     path: 'order',
                     populate: [
-                        {
-                            path: 'buyer'
-                        },
-                        {
-                            path: 'item'
-                        }
+                        { path: 'buyer', select: 'firstname lastname profileImageUrl' },
+                        { path: 'seller', select: 'firstname lastname profileImageUrl' },
+                        { path: 'item', select: 'title price coverImage quantity category' }
                     ]
                 })
 
@@ -1600,6 +1595,12 @@ UserApi.get(
                 return res.status(404).json({
                     message: 'Delivery not found'
                 })
+            }
+            const deliveryOrder = delivery.order;
+            const isBuyer = deliveryOrder?.buyer?._id?.toString() === req.user.id;
+            const isSeller = deliveryOrder?.seller?._id?.toString() === req.user.id;
+            if (!isBuyer && !isSeller) {
+                return res.status(403).json({ message: 'You are not allowed to view this delivery' });
             }
 
             res.status(200).json({
@@ -1723,11 +1724,13 @@ UserApi.get('/order/:orderId', VerifyToken, async (req, res) => {
             .populate('delivery')
             .populate({
                 path: 'seller',
-                populate: { path: 'campus' }
+                select: 'firstname lastname profileImageUrl email phoneNo campus',
+                populate: { path: 'campus', select: 'campusName city' }
             })
             .populate({
                 path: 'buyer',
-                populate: { path: 'campus' }
+                select: 'firstname lastname profileImageUrl email phoneNo campus',
+                populate: { path: 'campus', select: 'campusName city' }
             });
 
         if (!order) {
@@ -1892,7 +1895,7 @@ UserApi.patch('/notifications/:notificationId/read', VerifyToken, async (req, re
 UserApi.get('/sellerorders', VerifyToken, async (req, res) => {
     try {
         const orders = await OrderModel.find({ seller: req.user.id })
-            .populate('buyer')
+            .populate({ path: 'buyer', select: 'firstname lastname profileImageUrl email phoneNo' })
             .populate('item')
             .populate('delivery')
             .sort({ createdAt: -1 });
