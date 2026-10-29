@@ -496,6 +496,7 @@ UserApi.get('/items', async (req, res) => {
         ]
 
         if (campusId !== 'ALL') {
+            if (!mongoose.Types.ObjectId.isValid(campusId)) return res.status(400).json({ message: 'Invalid campus id' })
             lookupPipeline.push({
                 $match: {
                     'seller.campus._id': new mongoose.Types.ObjectId(campusId)
@@ -609,6 +610,7 @@ UserApi.get('/price-prediction', VerifyToken, async (req, res) => {
 UserApi.get("/item/:itemId", VerifyToken, async (req, res) => {
     try {
         const itemId = req.params.itemId
+        if (!mongoose.Types.ObjectId.isValid(itemId)) return res.status(400).json({ message: 'Invalid item id' })
         const item = await ItemModel.findById(itemId)
             .populate({
                 path: 'seller',
@@ -639,6 +641,7 @@ UserApi.post("/buyitem/:itemId", VerifyToken, async (req, res) => {
     try {
 
         const itemId = req.params.itemId
+        if (!mongoose.Types.ObjectId.isValid(itemId)) return res.status(400).json({ message: 'Invalid item id' })
 
         const {
 
@@ -1553,10 +1556,10 @@ UserApi.get('/campuses', async (req, res) => {
 UserApi.get('/campus/:campusId', async (req, res) => {
     try {
         const campusId = req.params.campusId
+        if (!mongoose.Types.ObjectId.isValid(campusId)) return res.status(400).json({ message: 'Invalid campus id' })
 
-        const campus = await CampusModel.findById(
-            campusId
-        )
+        const campus = await CampusModel.findById(campusId).select('campusName campusLogo city campusEmailDomain')
+        if (!campus) return res.status(404).json({ message: 'Campus not found' })
 
         const items = await ItemModel.find({ isActive: true })
             .populate({
@@ -1676,6 +1679,7 @@ UserApi.get(
     VerifyToken,
     async (req, res) => {
         try {
+            if (!mongoose.Types.ObjectId.isValid(req.params.deliveryId)) return res.status(400).json({ message: 'Invalid delivery id' })
             const delivery = await DeliveryModel.findById(req.params.deliveryId)
                 .populate({
                     path: 'order',
@@ -1814,6 +1818,7 @@ UserApi.post('/additem', VerifyToken, async (req, res) => {
 // Get order detail for invoice
 UserApi.get('/order/:orderId', VerifyToken, async (req, res) => {
     try {
+        if (!mongoose.Types.ObjectId.isValid(req.params.orderId)) return res.status(400).json({ message: 'Invalid order id' })
         const order = await OrderModel.findById(req.params.orderId)
             .populate('item')
             .populate('delivery')
