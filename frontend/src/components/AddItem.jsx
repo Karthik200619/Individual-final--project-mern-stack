@@ -2,7 +2,7 @@ import axios from 'axios'
 import React, { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router'
-import { FaArrowLeft, FaCloudUploadAlt, FaImage, FaVideo, FaCheckCircle, FaSpinner } from 'react-icons/fa'
+import { FaArrowLeft, FaCloudUploadAlt, FaImage, FaVideo, FaCheckCircle, FaSpinner, FaChartLine } from 'react-icons/fa'
 
 const API = 'https://individual-final-project-mern-stack.onrender.com/user-api/additem'
 const fieldClass = 'w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 px-4 py-3 text-sm text-slate-900 dark:text-slate-100 outline-none transition placeholder:text-slate-400 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10'
@@ -11,10 +11,14 @@ const labelClass = 'mb-1.5 block text-xs font-bold uppercase tracking-wide text-
 function AddItem() {
   const navigate = useNavigate()
   const [submitting, setSubmitting] = useState(false)
-  const { register, handleSubmit, watch, formState: { errors } } = useForm({ mode: 'onBlur', defaultValues: { category: '', rating: '5' } })
+  const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm({ mode: 'onBlur', defaultValues: { category: '', rating: '5' } })
   const coverFiles = watch('coverImage')
   const extraFiles = watch('images')
   const videoFiles = watch('videos')
+  const selectedCategory = watch('category')
+  const titleValue = watch('title')
+  const [priceEstimate, setPriceEstimate] = useState(null)
+  const [estimatingPrice, setEstimatingPrice] = useState(false)
   const [coverPreview, setCoverPreview] = useState('')
   const [imagePreviews, setImagePreviews] = useState([])
 
@@ -34,6 +38,26 @@ function AddItem() {
     setImagePreviews(urls)
     return () => urls.forEach(url => URL.revokeObjectURL(url))
   }, [extraFiles])
+
+  const estimatePrice = async () => {
+    if (!selectedCategory) return
+    try {
+      setEstimatingPrice(true)
+      const res = await axios.get('https://individual-final-project-mern-stack.onrender.com/user-api/price-prediction', {
+        params: { category: selectedCategory, title: titleValue || '' },
+        withCredentials: true
+      })
+      setPriceEstimate(res.data.payload || null)
+      if (!res.data.payload?.available) {
+        alert('There are not enough active listings in this category to estimate a price yet.')
+      }
+    } catch (err) {
+      console.error(err)
+      alert(err.response?.data?.message || 'Could not estimate a price right now.')
+    } finally {
+      setEstimatingPrice(false)
+    }
+  }
 
   const onceDone = async (data) => {
     if (!data.coverImage?.[0]) return
@@ -115,6 +139,18 @@ function AddItem() {
                     <label className={labelClass}>Price (₹) <span className="text-rose-500">*</span></label>
                     <input type="number" min="1" step="1" {...register('price', { required: 'Enter a price.', valueAsNumber: true, min: { value: 1, message: 'Price must be at least ₹1.' } })} className={fieldClass} placeholder="e.g. 450" />
                     {errors.price && <p className="mt-1.5 text-xs text-rose-500">{errors.price.message}</p>}
+                    <button type="button" onClick={estimatePrice} disabled={!selectedCategory || estimatingPrice} className="mt-2 inline-flex items-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50 px-3 py-2 text-xs font-bold text-indigo-700 transition hover:bg-indigo-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-indigo-900 dark:bg-indigo-950/40 dark:text-indigo-300">
+                      {estimatingPrice ? <FaSpinner className="animate-spin" /> : <FaChartLine />} {estimatingPrice ? 'Estimating…' : 'Predict a fair price'}
+                    </button>
+                    {priceEstimate?.available && (
+                      <div className="mt-3 rounded-2xl border border-indigo-100 bg-indigo-50/70 p-3 dark:border-indigo-900 dark:bg-indigo-950/30">
+                        <p className="text-[10px] font-bold uppercase tracking-wide text-indigo-700 dark:text-indigo-300">Comparable listing estimate</p>
+                        <p className="mt-1 text-xl font-black text-slate-900 dark:text-white">₹{priceEstimate.suggestedPrice?.toLocaleString('en-IN')}</p>
+                        <p className="mt-1 text-xs text-slate-600 dark:text-slate-300">Typical range ₹{priceEstimate.lowEstimate?.toLocaleString('en-IN')}–₹{priceEstimate.highEstimate?.toLocaleString('en-IN')} · based on {priceEstimate.sampleSize} listing(s)</p>
+                        <p className="mt-1 text-[10px] text-slate-500 dark:text-slate-400">Confidence: {priceEstimate.confidence}. This is an estimate, not a guaranteed sale price.</p>
+                        <button type="button" onClick={() => setValue('price', priceEstimate.suggestedPrice, { shouldValidate: true, shouldDirty: true })} className="mt-2 rounded-lg bg-indigo-600 px-3 py-2 text-[11px] font-bold text-white">Use suggested price</button>
+                      </div>
+                    )}
                   </div>
                   <div>
                     <label className={labelClass}>Available quantity <span className="text-rose-500">*</span></label>
