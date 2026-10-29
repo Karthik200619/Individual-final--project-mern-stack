@@ -67,7 +67,7 @@ function Orders() {
     }
 
     return (
-        <div className='min-h-screen bg-gray-100 p-4'>
+        <div className='min-h-screen bg-slate-50 p-4 text-slate-900 dark:bg-slate-950 dark:text-slate-100'>
             <h1 className='text-2xl font-bold mb-5'>
                 My Orders
             </h1>
@@ -76,7 +76,7 @@ function Orders() {
                 {orders.map((order) => (
                     <div
                         key={order._id}
-                        className='bg-white rounded-2xl p-4 shadow-sm'
+                        className='rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900'
                     >
                         <div className='flex gap-4'>
                             <img
@@ -95,15 +95,15 @@ function Orders() {
                                     </span>
                                 </div>
 
-                                <p className='text-sm text-gray-500 mt-2'>
+                                <p className='text-sm text-slate-600 mt-2 dark:text-slate-300'>
                                     Quantity: {order.quantity}
                                 </p>
-                                <p className='text-sm text-gray-500 mt-1'>
+                                <p className='text-sm text-slate-600 mt-1 dark:text-slate-300'>
                                     Payment: {order.paymentMethod}
                                 </p>
 
                                 <div className='mt-3'>
-                                    <span className='px-3 py-1 bg-indigo-50 text-indigo-600 rounded-full text-xs capitalize'>
+                                    <span className='px-3 py-1 bg-indigo-100 text-indigo-900 rounded-full dark:bg-indigo-950 dark:text-indigo-200 text-xs capitalize'>
                                         {order.status}
                                     </span>
                                 </div>
