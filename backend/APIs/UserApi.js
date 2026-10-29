@@ -485,7 +485,7 @@ UserApi.get('/price-prediction', VerifyToken, async (req, res) => {
             return res.status(400).json({ message: 'Choose a valid item category first' });
         }
 
-        const comparables = await ItemModel.find({ category, isActive: true, price: { $gt: 0 } })
+        const comparables = await ItemModel.find({ category, isActive: true, seller: { $ne: req.user.id }, price: { $gt: 0 } })
             .select('title price')
             .sort({ createdAt: -1 })
             .limit(300)
