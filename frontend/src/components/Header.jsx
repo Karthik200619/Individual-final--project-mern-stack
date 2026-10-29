@@ -109,6 +109,10 @@ function Header() {
                     label: 'My Listings'
                 },
                 {
+                    path: '/offers',
+                    label: 'Offers & Bargaining'
+                },
+                {
                     path: '/messages',
                     label: 'Messages'
                 },
