@@ -7,6 +7,7 @@ function DeliveryTracker() {
     const { deliveryId } = useParams()
 
     const [delivery,setDelivery] = useState(null)
+    const [loadError, setLoadError] = useState('')
 
     useEffect(()=>{
 
@@ -22,11 +23,13 @@ function DeliveryTracker() {
                 )
 
                 setDelivery(res.data.payload)
+                setLoadError('')
 
             }
             catch(err){
 
                 console.log(err)
+                setLoadError(err.response?.data?.message || 'Could not load this delivery. Please check access and try again.')
 
             }
 
@@ -37,9 +40,7 @@ function DeliveryTracker() {
     },[deliveryId])
 
     if(!delivery){
-
-        return <div>Loading...</div>
-
+        return <div className='mx-auto my-8 max-w-3xl rounded-2xl border border-slate-300 bg-white p-6 text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100' role={loadError ? 'alert' : 'status'}>{loadError || 'Loading delivery details…'}</div>
     }
 
     const statuses = [
@@ -64,20 +65,20 @@ function DeliveryTracker() {
 
     return (
 
-        <div className='min-h-screen bg-gray-100 p-4'>
+        <div className='min-h-screen rounded-2xl bg-slate-50 p-4 text-slate-900 dark:bg-slate-950 dark:text-slate-100'>
 
-            <div className='bg-white rounded-2xl p-5'>
+            <div className='rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900'>
 
                 <h1 className='text-2xl font-bold'>
                     Delivery Tracker
                 </h1>
 
-                <p className='text-sm text-gray-500 mt-2'>
+                <p className='text-sm text-slate-700 mt-2 dark:text-slate-300'>
                     Meetup Location:
                     {delivery.meetupLocation}
                 </p>
 
-                <p className='text-sm text-gray-500 mt-1'>
+                <p className='text-sm text-slate-700 mt-1 dark:text-slate-300'>
                     Type:
                     {delivery.deliveryType}
                 </p>
@@ -98,7 +99,7 @@ function DeliveryTracker() {
                                     ${
                                         index <= currentIndex
                                         ? 'bg-indigo-600'
-                                        : 'bg-gray-300'
+                                        : 'bg-slate-300 dark:bg-slate-700'
                                     }
                                     `}
                                 />
