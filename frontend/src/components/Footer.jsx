@@ -3,7 +3,7 @@ import { Link } from 'react-router'
 
 function Footer() {
     return (
-        <footer className="bg-gray-900 text-gray-300 mt-auto">
+        <footer className="mt-auto border-t border-slate-200 bg-white text-slate-600">
 
             <div className="max-w-7xl mx-auto px-8 py-10">
 
@@ -11,23 +11,23 @@ function Footer() {
 
 
                     <div>
-                        <h2 className="text-xl font-bold text-white mb-3">
-                            Campus Buy & Sell
+                        <h2 className="text-xl font-bold text-slate-900 mb-3">
+                            CampusKart
                         </h2>
 
-                        <p className="text-sm text-gray-400">
+                        <p className="text-sm text-slate-600">
                             Buy and sell products within your campus community.
                             Fast, secure and convenient.
                         </p>
                     </div>
 
                     <div>
-                        <h3 className="text-white font-semibold mb-3">
+                        <h3 className="text-slate-900 font-semibold mb-3">
                             Quick Links
                         </h3>
 
                         <ul className="space-y-2">
-                            <li className="hover:text-white cursor-pointer transition">
+                            <li className="hover:text-indigo-700 cursor-pointer transition">
                                 Home
                             </li>
                             <li className="hover:text-white cursor-pointer transition">
@@ -97,9 +97,9 @@ function Footer() {
 
                 </div>
 
-                <hr className="border-gray-700 my-6" />
+                <hr className="border-slate-200 my-6" />
 
-                <div className="text-center text-sm text-gray-500">
+                <div className="text-center text-sm text-slate-500">
                     © {new Date().getFullYear()} Campus Buy & Sell | All Rights Reserved
                 </div>
 
