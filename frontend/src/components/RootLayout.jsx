@@ -4,7 +4,7 @@ import Header from './Header'
 import Footer from './Footer'
 import ToastViewport from './ToastViewport'
 import { useAuth } from '../store/authStore'
-import { FaHome, FaSearch, FaPlusCircle, FaBoxOpen, FaShoppingCart, FaComments, FaTruck, FaQuestionCircle, FaCompass } from 'react-icons/fa'
+import { FaHome, FaSearch, FaPlusCircle, FaBoxOpen, FaShoppingCart, FaComments, FaTruck, FaQuestionCircle, FaCompass, FaHandshake } from 'react-icons/fa'
 
 const userNavigation = [
   { to: '/userhome', label: 'Home dashboard', icon: FaHome, end: true },
@@ -13,6 +13,7 @@ const userNavigation = [
   { to: '/myitems', label: 'My listings', icon: FaBoxOpen },
   { to: '/orders', label: 'My orders', icon: FaShoppingCart },
   { to: '/seller-orders', label: 'Seller orders', icon: FaTruck },
+  { to: '/offers', label: 'Offers & bargaining', icon: FaHandshake },
   { to: '/messages', label: 'Messages', icon: FaComments },
   { to: '/help-center', label: 'Help & support', icon: FaQuestionCircle },
 ]
