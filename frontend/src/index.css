@@ -109,3 +109,20 @@
   background-color: #334155;
   color: #e2e8f0;
 }
+
+/* Keep CampusKart consistently light across public and authenticated routes. */
+:root {
+  color-scheme: light;
+  background: #ffffff;
+  color: #0f172a;
+}
+html,
+body,
+#root {
+  min-height: 100%;
+  background-color: #ffffff;
+  color: #0f172a;
+}
+body {
+  margin: 0;
+}
