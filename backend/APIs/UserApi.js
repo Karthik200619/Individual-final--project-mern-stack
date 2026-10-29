@@ -21,6 +21,7 @@ import { MessageModel } from '../models/MessageModel.js';
 import { DiscountModel } from '../models/DiscountModel.js';
 import { HelpQueryModel } from '../models/HelpQueryModel.js';
 import { NotificationModel } from '../models/NotificationModel.js';
+import { OfferModel } from '../models/OfferModel.js';
 // use upload 
 const upload = multer()
 
@@ -396,8 +397,11 @@ UserApi.get('/items', async (req, res) => {
             {
                 $lookup: {
                     from: 'users',
-                    localField: 'seller',
-                    foreignField: '_id',
+                    let: { sellerId: '$seller' },
+                    pipeline: [
+                        { $match: { $expr: { $eq: ['$_id', '$sellerId'] } } },
+                        { $project: { _id: 1, firstname: 1, lastname: 1, profileImageUrl: 1, campus: 1 } }
+                    ],
                     as: 'seller'
                 }
             },
@@ -469,6 +473,62 @@ UserApi.get('/items', async (req, res) => {
     }
 })
 
+
+// Estimate a listing price from recent active listings in the same category.
+// This is a transparent comparable-listing estimate, not a guaranteed market value.
+UserApi.get('/price-prediction', VerifyToken, async (req, res) => {
+    try {
+        const category = String(req.query.category || '').trim().toUpperCase();
+        const title = String(req.query.title || '').trim();
+        const allowedCategories = ['BOOKS', 'ELECTRONICS', 'FASHION', 'FURNITURE', 'SPORTS', 'STATIONERY', 'OTHERS'];
+        if (!allowedCategories.includes(category)) {
+            return res.status(400).json({ message: 'Choose a valid item category first' });
+        }
+
+        const comparables = await ItemModel.find({ category, isActive: true, price: { $gt: 0 } })
+            .select('title price')
+            .sort({ createdAt: -1 })
+            .limit(300)
+            .lean();
+
+        if (!comparables.length) {
+            return res.status(200).json({
+                message: 'Not enough comparable listings yet',
+                payload: { available: false, sampleSize: 0 }
+            });
+        }
+
+        const terms = title.toLowerCase().split(/[^a-z0-9]+/).filter(word => word.length > 2);
+        const similar = terms.length
+            ? comparables.filter(item => terms.some(term => String(item.title || '').toLowerCase().includes(term)))
+            : [];
+        const sample = similar.length >= 3 ? similar : comparables;
+        const prices = sample.map(item => Number(item.price)).filter(price => Number.isFinite(price) && price > 0).sort((a, b) => a - b);
+        const middle = Math.floor(prices.length / 2);
+        const medianPrice = prices.length % 2 ? prices[middle] : Math.round((prices[middle - 1] + prices[middle]) / 2);
+        const lower = prices[Math.floor((prices.length - 1) * 0.25)];
+        const upper = prices[Math.ceil((prices.length - 1) * 0.75)];
+
+        return res.status(200).json({
+            message: 'Comparable listing estimate calculated',
+            payload: {
+                available: true,
+                medianPrice,
+                suggestedPrice: medianPrice,
+                lowEstimate: Math.round(lower),
+                highEstimate: Math.round(upper),
+                sampleSize: prices.length,
+                matchedBy: similar.length >= 3 ? 'similar titles and category' : 'category',
+                confidence: prices.length >= 10 ? 'higher' : prices.length >= 4 ? 'moderate' : 'limited',
+                note: 'Estimate is based on active CampusKart listings; item condition and demand may change the fair price.'
+            }
+        });
+    } catch (err) {
+        console.error('Price estimate failed:', err);
+        return res.status(500).json({ message: 'Failed to estimate price' });
+    }
+});
+
 // get item by Id (populated)
 UserApi.get("/item/:itemId", VerifyToken, async (req, res) => {
     try {
@@ -476,8 +536,10 @@ UserApi.get("/item/:itemId", VerifyToken, async (req, res) => {
         const item = await ItemModel.findById(itemId)
             .populate({
                 path: 'seller',
+                select: 'firstname lastname profileImageUrl campus',
                 populate: {
-                    path: 'campus'
+                    path: 'campus',
+                    select: 'campusName city preferredDeliveryLocations'
                 }
             })
             .populate({
@@ -504,7 +566,7 @@ UserApi.post("/buyitem/:itemId", VerifyToken, async (req, res) => {
 
         const {
 
-            quantity,
+            quantity: requestedQuantity,
 
             deliveryType,
 
@@ -516,9 +578,11 @@ UserApi.post("/buyitem/:itemId", VerifyToken, async (req, res) => {
 
             deliveryInstructions,
 
-            discountCode
-
+            discountCode,
+            offerId
         } = req.body
+
+        let quantity = Number(requestedQuantity)
 
         const selectedPaymentMethod = ['cash', 'upi', 'card'].includes(paymentMethod) ? paymentMethod : 'cash'
         if (!['cash', 'upi', 'card'].includes(paymentMethod)) {
@@ -563,6 +627,33 @@ UserApi.post("/buyitem/:itemId", VerifyToken, async (req, res) => {
 
         }
 
+        let unitPrice = item.price;
+        let acceptedOffer = null;
+        if (offerId) {
+            if (!mongoose.Types.ObjectId.isValid(String(offerId))) {
+                return res.status(400).json({ message: 'Invalid offer reference' });
+            }
+            acceptedOffer = await OfferModel.findOne({
+                _id: offerId,
+                item: item._id,
+                buyer: req.user.id,
+                seller: item.seller._id,
+                status: 'accepted'
+            });
+            if (!acceptedOffer) {
+                return res.status(400).json({ message: 'This offer is not accepted or does not belong to your account' });
+            }
+            if (Number(requestedQuantity) !== acceptedOffer.quantity) {
+                return res.status(400).json({ message: 'Checkout quantity must match the accepted offer quantity' });
+            }
+            quantity = acceptedOffer.quantity;
+            unitPrice = acceptedOffer.offeredPrice;
+        }
+
+        if (!Number.isInteger(quantity) || quantity < 1) {
+            return res.status(400).json({ message: 'Choose a valid quantity' });
+        }
+
         // stock check
         if (quantity > item.quantity) {
 
@@ -573,7 +664,7 @@ UserApi.post("/buyitem/:itemId", VerifyToken, async (req, res) => {
         }
 
         // Calculate total price and discount
-        let subtotal = quantity * item.price
+        let subtotal = quantity * unitPrice
         let discountPercent = 0
         let discountAmount = 0
 
@@ -647,6 +738,11 @@ UserApi.post("/buyitem/:itemId", VerifyToken, async (req, res) => {
         })
 
         // create delivery
+        if (acceptedOffer) {
+            acceptedOffer.status = 'completed';
+            await acceptedOffer.save();
+        }
+
         const delivery = await DeliveryModel.create({
 
             order: order._id,
@@ -763,6 +859,117 @@ UserApi.post("/buyitem/:itemId", VerifyToken, async (req, res) => {
 
 
 
+
+// ================= MULTIPLE OFFERS & BARGAINING =================
+
+// A buyer can make separate offers on the same listing; offers never reserve stock.
+UserApi.post('/offers/:itemId', VerifyToken, async (req, res) => {
+    try {
+        const { itemId } = req.params;
+        const offeredPrice = Number(req.body.offeredPrice);
+        const quantity = Number(req.body.quantity || 1);
+        const message = String(req.body.message || '').trim();
+
+        if (!mongoose.Types.ObjectId.isValid(itemId)) return res.status(400).json({ message: 'Invalid item id' });
+        if (!Number.isFinite(offeredPrice) || offeredPrice <= 0) return res.status(400).json({ message: 'Enter a valid offer price' });
+        if (!Number.isInteger(quantity) || quantity < 1) return res.status(400).json({ message: 'Quantity must be a whole number greater than zero' });
+        if (message.length > 500) return res.status(400).json({ message: 'Message must be 500 characters or fewer' });
+
+        const item = await ItemModel.findOne({ _id: itemId, isActive: true });
+        if (!item) return res.status(404).json({ message: 'Listing not found or is no longer available' });
+        if (item.seller.toString() === req.user.id) return res.status(400).json({ message: 'You cannot make an offer on your own listing' });
+        if (quantity > item.quantity) return res.status(400).json({ message: 'Requested quantity exceeds available stock' });
+
+        const offer = await OfferModel.create({
+            item: item._id,
+            buyer: req.user.id,
+            seller: item.seller,
+            askingPrice: item.price,
+            offeredPrice,
+            quantity,
+            message,
+            status: 'pending'
+        });
+        return res.status(201).json({ message: 'Offer sent to seller', payload: offer });
+    } catch (err) {
+        console.error('Create offer failed:', err);
+        return res.status(500).json({ message: 'Failed to send offer' });
+    }
+});
+
+UserApi.get('/offers/mine', VerifyToken, async (req, res) => {
+    try {
+        const offers = await OfferModel.find({ buyer: req.user.id })
+            .populate({ path: 'item', select: 'title price coverImage quantity category isActive' })
+            .populate({ path: 'seller', select: 'firstname lastname profileImageUrl' })
+            .sort({ updatedAt: -1 });
+        return res.status(200).json({ message: 'Your offers', payload: offers });
+    } catch (err) {
+        console.error('Fetch buyer offers failed:', err);
+        return res.status(500).json({ message: 'Failed to fetch your offers' });
+    }
+});
+
+UserApi.get('/seller/offers', VerifyToken, async (req, res) => {
+    try {
+        const offers = await OfferModel.find({ seller: req.user.id })
+            .populate({ path: 'item', select: 'title price coverImage quantity category isActive' })
+            .populate({ path: 'buyer', select: 'firstname lastname profileImageUrl' })
+            .sort({ updatedAt: -1 });
+        return res.status(200).json({ message: 'Offers on your listings', payload: offers });
+    } catch (err) {
+        console.error('Fetch seller offers failed:', err);
+        return res.status(500).json({ message: 'Failed to fetch incoming offers' });
+    }
+});
+
+UserApi.patch('/offers/:offerId/respond', VerifyToken, async (req, res) => {
+    try {
+        const { offerId } = req.params;
+        const { action } = req.body;
+        if (!mongoose.Types.ObjectId.isValid(offerId)) return res.status(400).json({ message: 'Invalid offer id' });
+        if (!['accept', 'reject', 'counter'].includes(action)) return res.status(400).json({ message: 'Choose accept, reject, or counter' });
+
+        const offer = await OfferModel.findById(offerId);
+        if (!offer) return res.status(404).json({ message: 'Offer not found' });
+        if (offer.seller.toString() !== req.user.id) return res.status(403).json({ message: 'Only the listing seller can respond to this offer' });
+        if (offer.status !== 'pending') return res.status(409).json({ message: 'This offer has already been responded to' });
+
+        if (action === 'counter') {
+            const counterPrice = Number(req.body.counterPrice);
+            if (!Number.isFinite(counterPrice) || counterPrice <= 0) return res.status(400).json({ message: 'Enter a valid counter-offer price' });
+            offer.counterPrice = counterPrice;
+            offer.status = 'countered';
+        } else {
+            offer.status = action === 'accept' ? 'accepted' : 'rejected';
+        }
+        await offer.save();
+        return res.status(200).json({ message: action === 'counter' ? 'Counter-offer sent' : `Offer ${action}ed`, payload: offer });
+    } catch (err) {
+        console.error('Respond to offer failed:', err);
+        return res.status(500).json({ message: 'Failed to respond to offer' });
+    }
+});
+
+UserApi.patch('/offers/:offerId/accept-counter', VerifyToken, async (req, res) => {
+    try {
+        const { offerId } = req.params;
+        if (!mongoose.Types.ObjectId.isValid(offerId)) return res.status(400).json({ message: 'Invalid offer id' });
+        const offer = await OfferModel.findById(offerId);
+        if (!offer) return res.status(404).json({ message: 'Offer not found' });
+        if (offer.buyer.toString() !== req.user.id) return res.status(403).json({ message: 'Only the buyer who made this offer can accept the counter-offer' });
+        if (offer.status !== 'countered' || !offer.counterPrice) return res.status(409).json({ message: 'No counter-offer is waiting for your response' });
+
+        offer.offeredPrice = offer.counterPrice;
+        offer.status = 'accepted';
+        await offer.save();
+        return res.status(200).json({ message: 'Counter-offer accepted. You can now check out at this price.', payload: offer });
+    } catch (err) {
+        console.error('Accept counter-offer failed:', err);
+        return res.status(500).json({ message: 'Failed to accept counter-offer' });
+    }
+});
+
 // ================= CART ENDPOINTS =================
 
 // Get cart
@@ -790,7 +997,11 @@ UserApi.get('/seller-items/:sellerId', async (req, res) => {
             seller: sellerId,
             isActive: true
         })
-            .populate('seller')
+            .populate({
+                path: 'seller',
+                select: 'firstname lastname profileImageUrl campus',
+                populate: { path: 'campus', select: 'campusName city' }
+            })
             .sort({ createdAt: -1 })
 
         res.status(200).json({
