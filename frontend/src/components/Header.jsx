@@ -14,6 +14,7 @@ function Header() {
 
   useEffect(() => {
     document.documentElement.classList.remove('dark')
+    document.documentElement.style.colorScheme = 'light'
     localStorage.setItem('theme', 'light')
   }, [])
 
@@ -67,18 +68,18 @@ function Header() {
           <button onClick={() => setCouponBarDismissed(true)} aria-label="Dismiss coupon offer" className="rounded p-1 text-amber-800 hover:bg-amber-100"><FaTimes /></button>
         </div>
       )}
-      <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 px-4 py-3 shadow-sm backdrop-blur sm:px-6">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4">
-          <button type="button" onClick={() => navigate('/')} className="flex items-center gap-2.5 rounded-lg" aria-label="CampusKart home">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-sm"><FaShoppingBag /></span>
-            <span className="text-xl font-extrabold tracking-tight text-slate-900">CampusKart</span>
+      <header className="sticky top-0 z-50 border-b border-slate-200 bg-white px-4 py-2.5 sm:px-6">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-3">
+          <button type="button" onClick={() => navigate('/')} className="flex items-center gap-2 rounded-lg" aria-label="CampusKart home">
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-sm text-white"><FaShoppingBag /></span>
+            <span className="text-lg font-extrabold tracking-tight text-slate-900">CampusKart</span>
           </button>
 
-          {isAuthenticated && (
-            <div className="flex items-center gap-3">
+          {isAuthenticated ? (
+            <div className="flex items-center gap-1.5 sm:gap-2">
               <div className="relative">
                 <button type="button" onClick={() => setNotificationOpen(prev => !prev)} className="relative rounded-full p-2.5 text-slate-600 transition hover:bg-slate-100 hover:text-indigo-700" aria-label="View notifications">
-                  <FaBell size={17} />
+                  <FaBell size={16} />
                   {unreadCount > 0 && <span className="absolute right-0.5 top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-500 px-1 text-[9px] font-bold text-white">{unreadCount}</span>}
                 </button>
                 {notificationOpen && (
@@ -102,11 +103,16 @@ function Header() {
                   </div>
                 )}
               </div>
-              <button type="button" onClick={() => navigate('/profile')} className="flex items-center gap-2 rounded-full p-1 transition hover:bg-slate-100" aria-label="Open profile" title="Profile">
-                {currentUser?.profileImageUrl ? <img src={currentUser.profileImageUrl} alt="" className="h-9 w-9 rounded-full border border-slate-200 object-cover" /> : <FaUserCircle className="h-8 w-8 text-slate-400" />}
+              <button type="button" onClick={() => navigate('/profile')} className="flex items-center justify-center rounded-full p-0.5 transition hover:ring-2 hover:ring-indigo-100" aria-label="Open profile" title="Profile">
+                {currentUser?.profileImageUrl ? <img src={currentUser.profileImageUrl} alt="" className="h-8 w-8 rounded-full border border-slate-200 object-cover" /> : <FaUserCircle className="h-8 w-8 text-slate-400" />}
               </button>
-              <button type="button" onClick={onLogout} aria-label="Log out" title="Log out" className="rounded-full p-2.5 text-slate-500 transition hover:bg-rose-50 hover:text-rose-700"><FaSignOutAlt size={17} /></button>
+              <button type="button" onClick={onLogout} aria-label="Log out" title="Log out" className="rounded-full p-2.5 text-slate-500 transition hover:bg-rose-50 hover:text-rose-700"><FaSignOutAlt size={16} /></button>
             </div>
+          ) : (
+            <nav className="flex items-center gap-2" aria-label="Guest navigation">
+              <button type="button" onClick={() => navigate('/login')} className="rounded-lg px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 hover:text-indigo-700">Sign in</button>
+              <button type="button" onClick={() => navigate('/register')} className="rounded-lg bg-indigo-600 px-3.5 py-2 text-sm font-bold text-white transition hover:bg-indigo-700">Get started</button>
+            </nav>
           )}
         </div>
       </header>
