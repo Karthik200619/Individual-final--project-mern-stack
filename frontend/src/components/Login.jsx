@@ -21,7 +21,7 @@ function Login() {
       }
 
       if (user.role === "ADMIN") {
-        navigate("/admindashboard")
+        navigate("/admin-dashboard")
       } else {
         navigate("/userhome")
       }
