@@ -480,7 +480,7 @@ UserApi.get('/items', async (req, res) => {
                     pipeline: [
                         // Aggregation variables must use $; using $sellerId compares
                         // against a document field and causes the seller lookup to return no users.
-                        { $match: { $expr: { $eq: ['$_id', '$sellerId'] } } },
+                        { $match: { $expr: { $eq: ['$_id', '$$sellerId'] } } },
                         { $project: { _id: 1, firstname: 1, lastname: 1, profileImageUrl: 1, campus: 1 } }
                     ],
                     as: 'seller'
