@@ -140,6 +140,14 @@ const router = createBrowserRouter([{
           <AdminDashBoard/>
         </ProtectedRoute>
       },
+      // Keep the earlier login URL working while all navigation uses /admin-dashboard.
+      {
+        path:'/admindashboard',
+        element:
+        <ProtectedRoute allowedRoles={["ADMIN"]} >
+          <AdminDashBoard/>
+        </ProtectedRoute>
+      },
       {
         path: "/myitems",
         element:
