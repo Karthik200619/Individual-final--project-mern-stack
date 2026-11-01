@@ -478,8 +478,8 @@ UserApi.get('/items', async (req, res) => {
                     from: 'users',
                     let: { sellerId: '$seller' },
                     pipeline: [
-                        // Aggregation variables must use $; using $sellerId compares
-                        // against a document field and causes the seller lookup to return no users.
+                        // Aggregation variables must use $; a single $ reads a document field
+                        // and makes this seller lookup return no users.
                         { $match: { $expr: { $eq: ['$_id', '$$sellerId'] } } },
                         { $project: { _id: 1, firstname: 1, lastname: 1, profileImageUrl: 1, campus: 1 } }
                     ],
